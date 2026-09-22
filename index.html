@@ -1,0 +1,2487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Don Bosco Youth Center</title>
+<meta name="description" content="Student management system for Don Bosco Youth Center"/>
+<meta name="theme-color" content="#7c3aed"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<link rel="icon" href="icons/icon-192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e1a;--bg2:#0f1528;--bg3:#141b35;
+  --card:rgba(255,255,255,0.04);--card-b:rgba(255,255,255,0.08);
+  --glass:rgba(255,255,255,0.06);--glass-b:rgba(255,255,255,0.12);
+  --accent:#7c3aed;--accent2:#a78bfa;--accent3:#38bdf8;
+  --gold:#f59e0b;--green:#22d3a5;--red:#f87171;--yellow:#fbbf24;
+  --text:#f0f4ff;--text2:#94a3c4;--text3:#5a6a8a;
+  --r:14px;--rs:9px;--sh:0 8px 32px rgba(0,0,0,.45);
+  --t:all .22s cubic-bezier(.4,0,.2,1);
+  --sidebar-w:240px;--sidebar-w-c:68px;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+}
+html{height:100%;scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── AMBIENT ── */
+body::before,body::after{content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+body::before{width:700px;height:700px;background:radial-gradient(circle,rgba(124,58,237,.1) 0%,transparent 70%);top:-250px;left:-200px}
+body::after{width:500px;height:500px;background:radial-gradient(circle,rgba(56,189,248,.08) 0%,transparent 70%);bottom:-150px;right:-150px}
+
+/* ── LAYOUT ── */
+.app-shell{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);min-height:100vh;
+  background:rgba(10,14,26,.95);backdrop-filter:blur(24px);
+  border-right:1px solid var(--card-b);
+  display:flex;flex-direction:column;
+  position:fixed;left:0;top:0;bottom:0;z-index:50;
+  transition:width .3s cubic-bezier(.4,0,.2,1);overflow:hidden;
+  padding-top:var(--safe-t);
+}
+.sidebar.collapsed{width:var(--sidebar-w-c)}
+.sidebar-header{
+  display:flex;align-items:center;gap:10px;
+  padding:16px 14px;border-bottom:1px solid var(--card-b);
+  min-height:72px;
+}
+.sidebar-logo{
+  width:40px;height:40px;border-radius:10px;object-fit:cover;flex-shrink:0;
+  box-shadow:0 0 16px rgba(124,58,237,.5);
+}
+.sidebar-logo-fallback{
+  width:40px;height:40px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--gold));
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  box-shadow:0 0 16px rgba(124,58,237,.5);
+}
+.sidebar-brand{overflow:hidden;white-space:nowrap;transition:var(--t)}
+.sidebar-brand-name{font-family:'Outfit',sans-serif;font-size:14px;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar-brand-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.sidebar.collapsed .sidebar-brand{opacity:0;width:0}
+
+.sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;overflow-x:hidden}
+.sidebar-nav::-webkit-scrollbar{width:3px}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--card-b);border-radius:2px}
+
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;border-radius:var(--rs);
+  cursor:pointer;transition:var(--t);
+  color:var(--text2);font-size:13px;font-weight:500;
+  white-space:nowrap;margin-bottom:2px;text-decoration:none;
+  border:1px solid transparent;
+}
+.nav-item:hover{background:rgba(124,58,237,.1);color:var(--text);border-color:rgba(124,58,237,.2)}
+.nav-item.active{background:rgba(124,58,237,.18);color:var(--accent2);border-color:rgba(124,58,237,.35);font-weight:600}
+.nav-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center}
+.nav-label{transition:var(--t)}
+.sidebar.collapsed .nav-label{opacity:0;width:0}
+
+.sidebar-section-label{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:8px 14px 4px;white-space:nowrap}
+.sidebar.collapsed .sidebar-section-label{opacity:0}
+
+.sidebar-footer{padding:12px 8px;border-top:1px solid var(--card-b)}
+.online-pill{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 10px;border-radius:20px;font-size:11px;font-weight:600;
+  border:1px solid;cursor:default;
+}
+.online-pill.on{background:rgba(34,211,165,.1);border-color:rgba(34,211,165,.3);color:var(--green)}
+.online-pill.off{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:var(--red)}
+.pulse{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:rgba(10,14,26,.9);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--card-b);
+  display:flex;align-items:center;gap:12px;
+  padding:12px 20px;padding-top:calc(12px + var(--safe-t));
+  min-height:64px;
+}
+.topbar-toggle{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--card);border:1px solid var(--card-b);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;transition:var(--t);flex-shrink:0;
+}
+.topbar-toggle:hover{background:rgba(124,58,237,.15);border-color:var(--accent)}
+.topbar-title{font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;color:var(--text);flex:1}
+.topbar-subtitle{font-size:11px;color:var(--text3)}
+.topbar-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.icon-btn{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--card);border:1px solid var(--card-b);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;transition:var(--t);
+}
+.icon-btn:hover{background:rgba(124,58,237,.15);border-color:var(--accent)}
+.gas-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.gas-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+.gas-dot.no{background:var(--text3)}
+.gas-dot.checking{background:var(--yellow);animation:pulse 1s infinite}
+
+/* ── MAIN CONTENT ── */
+.main-content{
+  margin-left:var(--sidebar-w);flex:1;
+  transition:margin-left .3s cubic-bezier(.4,0,.2,1);
+  min-height:100vh;display:flex;flex-direction:column;
+}
+.main-content.sidebar-collapsed{margin-left:var(--sidebar-w-c)}
+
+.view-container{flex:1;padding:20px;padding-bottom:calc(20px + var(--safe-b));max-width:1200px;width:100%}
+.view{display:none}
+.view.active{display:block}
+
+/* ── COMMON COMPONENTS ── */
+.page-header{margin-bottom:20px}
+.page-title{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:var(--text)}
+.page-sub{font-size:13px;color:var(--text2);margin-top:3px}
+
+.card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--r);padding:20px;backdrop-filter:blur(10px);transition:var(--t)}
+.card:hover{border-color:rgba(255,255,255,.12)}
+.card-sm{padding:14px}
+
+.section-title{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+/* Grid layouts */
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+
+/* Stat cards */
+.stat-card{
+  background:var(--card);border:1px solid var(--card-b);
+  border-radius:var(--r);padding:18px;
+  display:flex;flex-direction:column;gap:4px;
+  transition:var(--t);position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent3));
+}
+.stat-card:hover{border-color:rgba(124,58,237,.3);transform:translateY(-2px)}
+.stat-icon{font-size:24px;margin-bottom:6px}
+.stat-num{font-family:'Outfit',sans-serif;font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.stat-change{font-size:11px;color:var(--green);margin-top:4px}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 20px;border-radius:var(--rs);border:none;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;transition:var(--t);user-select:none;
+}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#6d28d9);color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.5)}
+.btn-primary:active{transform:translateY(0)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#d97706);color:#000;box-shadow:0 4px 16px rgba(245,158,11,.3)}
+.btn-gold:hover{transform:translateY(-2px)}
+.btn-success{background:linear-gradient(135deg,#22d3a5,#059669);color:#fff;box-shadow:0 4px 16px rgba(34,211,165,.3)}
+.btn-success:hover{transform:translateY(-2px)}
+.btn-danger{background:linear-gradient(135deg,#f87171,#ef4444);color:#fff;box-shadow:0 4px 16px rgba(248,113,113,.3)}
+.btn-danger:hover{transform:translateY(-2px)}
+.btn-outline{background:transparent;border:1px solid var(--card-b);color:var(--text2)}
+.btn-outline:hover{border-color:var(--accent2);color:var(--accent2);background:rgba(124,58,237,.08)}
+.btn-ghost{background:transparent;color:var(--text2)}
+.btn-ghost:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.btn-sm{padding:7px 13px;font-size:12px}
+.btn-xs{padding:4px 10px;font-size:11px}
+.btn-full{width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+
+/* Form */
+.form-group{margin-bottom:14px}
+.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block}
+.form-label .req{color:var(--red)}
+.form-input,.form-select,.form-textarea{
+  width:100%;background:rgba(255,255,255,.05);
+  border:1px solid var(--card-b);border-radius:var(--rs);
+  padding:11px 13px;color:var(--text);font-size:13px;
+  font-family:'Inter',sans-serif;transition:var(--t);outline:none;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  border-color:var(--accent);background:rgba(124,58,237,.08);
+  box-shadow:0 0 0 3px rgba(124,58,237,.15);
+}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.5}
+.form-select option{background:var(--bg2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.form-hint{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.badge-active{background:rgba(34,211,165,.15);color:var(--green);border:1px solid rgba(34,211,165,.3)}
+.badge-inactive{background:rgba(148,163,196,.12);color:var(--text3);border:1px solid rgba(148,163,196,.2)}
+.badge-house{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700}
+
+/* Search bar */
+.search-bar{
+  display:flex;align-items:center;gap:10px;
+  background:var(--card);border:1px solid var(--card-b);
+  border-radius:var(--rs);padding:10px 14px;
+  transition:var(--t);
+}
+.search-bar:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.15)}
+.search-bar input{background:transparent;border:none;outline:none;color:var(--text);font-size:13px;flex:1;font-family:'Inter',sans-serif}
+.search-bar input::placeholder{color:var(--text3)}
+
+/* Table */
+.table-wrap{background:var(--card);border:1px solid var(--card-b);border-radius:var(--r);overflow:hidden;overflow-x:auto}
+.data-table{width:100%;border-collapse:collapse;min-width:500px}
+.data-table th{padding:11px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--card-b)}
+.data-table td{padding:11px 14px;font-size:12px;color:var(--text);border-bottom:1px solid rgba(255,255,255,.04)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tbody tr:hover td{background:rgba(255,255,255,.03)}
+
+/* Student card */
+.student-card{
+  background:var(--card);border:1px solid var(--card-b);
+  border-radius:var(--r);padding:16px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  text-align:center;transition:var(--t);cursor:pointer;position:relative;
+}
+.student-card:hover{border-color:rgba(124,58,237,.4);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.3)}
+.student-photo{
+  width:72px;height:72px;border-radius:50%;object-fit:cover;
+  border:2px solid rgba(124,58,237,.4);
+  background:var(--bg3);
+}
+.student-avatar{
+  width:72px;height:72px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent3));
+  border:2px solid rgba(124,58,237,.4);flex-shrink:0;
+}
+.student-name{font-size:14px;font-weight:700;color:var(--text);line-height:1.2}
+.student-id{font-size:11px;color:var(--text3);font-family:monospace}
+.student-actions{display:flex;gap:6px;margin-top:4px;width:100%}
+.student-card .house-stripe{
+  position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;
+}
+
+/* Photo capture */
+.photo-capture-area{
+  width:100%;aspect-ratio:3/4;max-height:320px;
+  background:var(--bg3);border-radius:var(--rs);overflow:hidden;
+  position:relative;border:2px dashed var(--card-b);
+  display:flex;align-items:center;justify-content:center;
+}
+.photo-capture-area video,.photo-capture-area img,.photo-capture-area canvas{
+  width:100%;height:100%;object-fit:cover;
+}
+.photo-capture-placeholder{color:var(--text3);text-align:center;padding:20px}
+.photo-capture-placeholder .ph-icon{font-size:48px;margin-bottom:8px}
+
+/* ID Card */
+.id-card-preview{
+  width:300px;background:#fff;border-radius:12px;
+  overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.6);
+  font-family:'Inter',sans-serif;color:#111;
+  margin:0 auto;
+}
+.id-card-header{
+  padding:14px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.id-card-logo{width:48px;height:48px;object-fit:cover;border-radius:8px}
+.id-card-center-name{font-size:12px;font-weight:800;color:#fff;line-height:1.2}
+.id-card-body{padding:14px;display:flex;gap:12px;align-items:flex-start}
+.id-card-photo{width:80px;height:100px;border-radius:8px;object-fit:cover;flex-shrink:0;border:2px solid #eee}
+.id-card-info{flex:1;min-width:0}
+.id-card-name{font-size:14px;font-weight:800;word-break:break-word;line-height:1.2;margin-bottom:4px}
+.id-card-sid{font-size:10px;font-weight:700;font-family:monospace;margin-bottom:8px;opacity:.7}
+.id-card-field{font-size:10px;margin-bottom:3px;color:#333}
+.id-card-field strong{color:#111}
+.id-card-qr-section{padding:10px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #eee}
+.id-card-qr{background:#fff;padding:4px;border-radius:4px}
+.id-card-footer{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid rgba(255,255,255,.2)}
+.id-card-founder-photo{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.5)}
+.id-card-founder-name{font-size:9px;color:rgba(255,255,255,.9);font-weight:600}
+.id-card-founder-title{font-size:8px;color:rgba(255,255,255,.6)}
+.house-color-bar{height:6px;width:100%}
+
+/* Attendance scanner */
+.scanner-box{background:var(--card);border:1px solid var(--card-b);border-radius:var(--r);overflow:hidden}
+.scanner-box-hdr{padding:12px 14px;border-bottom:1px solid var(--card-b);display:flex;align-items:center;justify-content:space-between}
+.scanner-box-title{font-size:13px;font-weight:600;color:var(--text2)}
+#qr-reader{width:100%;background:#000}
+#qr-reader video{width:100%!important}
+#qr-reader img,#qr-reader__dashboard{display:none!important}
+.scan-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:170px;height:170px;border:2px solid rgba(124,58,237,.6);border-radius:12px;pointer-events:none}
+.scan-overlay::before,.scan-overlay::after{content:'';position:absolute;width:26px;height:26px;border-color:var(--accent);border-style:solid}
+.scan-overlay::before{top:-2px;left:-2px;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
+.scan-overlay::after{bottom:-2px;right:-2px;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
+.scan-line{position:absolute;width:calc(100% - 4px);height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);left:2px;animation:scanLine 2s linear infinite}
+@keyframes scanLine{0%{top:4px}100%{top:calc(100% - 6px)}}
+.last-scan{padding:12px 14px;display:none;animation:slideIn .3s ease}
+.last-scan.show{display:block}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.last-scan.ok{background:rgba(34,211,165,.08);border-left:3px solid var(--green)}
+.last-scan.dup{background:rgba(251,191,36,.08);border-left:3px solid var(--yellow)}
+.last-scan.err{background:rgba(248,113,113,.08);border-left:3px solid var(--red)}
+
+/* Field builder */
+.field-item{
+  background:rgba(255,255,255,.04);border:1px solid var(--card-b);
+  border-radius:var(--rs);padding:12px 14px;
+  display:flex;align-items:center;gap:10px;
+  cursor:grab;transition:var(--t);
+}
+.field-item:hover{border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.06)}
+.field-item.dragging{opacity:.5;border:2px dashed var(--accent)}
+.field-drag{color:var(--text3);font-size:16px;cursor:grab}
+.field-info{flex:1;min-width:0}
+.field-label{font-size:13px;font-weight:600;color:var(--text)}
+.field-meta{font-size:11px;color:var(--text3)}
+.field-actions{display:flex;gap:5px}
+
+/* House card */
+.house-card{
+  background:var(--card);border:1px solid var(--card-b);
+  border-radius:var(--r);padding:18px;
+  transition:var(--t);position:relative;overflow:hidden;
+}
+.house-card:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+.house-top{height:4px;border-radius:var(--r) var(--r) 0 0;position:absolute;top:0;left:0;right:0}
+.house-icon{font-size:32px;margin-bottom:8px;display:block}
+.house-name{font-size:16px;font-weight:800;color:var(--text)}
+.house-count{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.house-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+
+/* Toast */
+.toast-wrap{position:fixed;bottom:calc(24px + var(--safe-b));right:24px;z-index:9999;display:flex;flex-direction:column;gap:7px}
+.toast{
+  background:var(--bg3);border:1px solid var(--glass-b);backdrop-filter:blur(20px);
+  border-radius:var(--rs);padding:10px 14px;
+  display:flex;align-items:center;gap:9px;
+  font-size:12px;font-weight:500;color:var(--text);
+  box-shadow:var(--sh);animation:toastIn .3s ease;max-width:280px;
+}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.toast.out{animation:toastOut .3s ease forwards}
+@keyframes toastOut{to{opacity:0;transform:translateX(16px)}}
+
+/* Modal */
+.modal-mask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);z-index:200;align-items:center;justify-content:center;padding:16px}
+.modal-mask.open{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--glass-b);
+  border-radius:var(--r);padding:24px;
+  width:100%;box-shadow:var(--sh);
+  animation:modalIn .3s cubic-bezier(.4,0,.2,1);
+  max-height:90vh;overflow-y:auto;
+}
+.modal.sm{max-width:420px}
+.modal.md{max-width:560px}
+.modal.lg{max-width:780px}
+.modal.xl{max-width:960px}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(-8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-title{font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;margin-bottom:16px;color:var(--text);display:flex;align-items:center;justify-content:space-between}
+.modal-close{cursor:pointer;color:var(--text3);font-size:20px;line-height:1;padding:2px}
+.modal-close:hover{color:var(--red)}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;border-top:1px solid var(--card-b);padding-top:16px}
+
+/* Loading */
+.loading-overlay{position:fixed;inset:0;background:rgba(10,14,26,.8);z-index:300;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.loading-overlay.show{display:flex}
+.spinner{width:48px;height:48px;border:3px solid rgba(124,58,237,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--text2)}
+
+/* Empty state */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-state .ei{font-size:48px;margin-bottom:12px}
+.empty-state strong{display:block;font-size:15px;color:var(--text2);margin-bottom:6px}
+
+/* Settings tabs */
+.settings-tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--card-b);padding-bottom:0}
+.settings-tab{padding:8px 16px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:var(--t);margin-bottom:-1px}
+.settings-tab:hover{color:var(--text2)}
+.settings-tab.active{color:var(--accent2);border-bottom-color:var(--accent2)}
+.settings-panel{display:none}
+.settings-panel.active{display:block}
+
+/* Upload zone */
+.upload-zone{
+  border:2px dashed var(--card-b);border-radius:var(--rs);
+  padding:24px;text-align:center;cursor:pointer;
+  transition:var(--t);background:rgba(255,255,255,.02);
+}
+.upload-zone:hover{border-color:var(--accent);background:rgba(124,58,237,.06)}
+.upload-zone.dragover{border-color:var(--accent);background:rgba(124,58,237,.1)}
+.upload-preview{width:80px;height:80px;border-radius:10px;object-fit:cover;margin:0 auto 8px;display:block}
+
+/* Color swatches */
+.color-swatches{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.color-swatch{width:28px;height:28px;border-radius:6px;cursor:pointer;transition:var(--t);border:2px solid transparent}
+.color-swatch:hover,.color-swatch.active{border-color:#fff;transform:scale(1.1)}
+
+/* Report bar */
+.report-bar{background:rgba(124,58,237,.15);border-radius:4px;height:8px;margin-top:4px;overflow:hidden}
+.report-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:4px;transition:width .5s ease}
+
+/* Tabs inside views */
+.view-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.view-tab{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:var(--t);color:var(--text2);border:1px solid transparent}
+.view-tab:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.view-tab.active{color:var(--accent2);background:rgba(124,58,237,.14);border-color:rgba(124,58,237,.3)}
+
+/* Admission steps */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:24px}
+.step{display:flex;align-items:center;gap:8px;flex:1}
+.step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;transition:var(--t);border:2px solid var(--card-b);color:var(--text3)}
+.step-dot.done{background:var(--green);border-color:var(--green);color:#fff}
+.step-dot.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 12px rgba(124,58,237,.5)}
+.step-label{font-size:11px;font-weight:600;color:var(--text3)}
+.step.active .step-label,.step.done .step-label{color:var(--text)}
+.step-line{flex:1;height:2px;background:var(--card-b);margin:0 4px}
+.step-line.done{background:var(--green)}
+
+/* Profile info grid */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.profile-field{padding:10px 12px;background:rgba(255,255,255,.03);border-radius:var(--rs);border:1px solid var(--card-b)}
+.profile-field-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.profile-field-value{font-size:13px;font-weight:500;color:var(--text)}
+
+/* Print styles */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body>*{display:none!important}
+  #print-area{display:block!important}
+  .print-page{page-break-after:always}
+  .id-card-preview{box-shadow:none!important}
+}
+#print-area{display:none}
+
+/* Bottom nav (mobile) */
+.bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  background:rgba(10,14,26,.95);backdrop-filter:blur(20px);
+  border-top:1px solid var(--card-b);
+  padding:8px 0;padding-bottom:calc(8px + var(--safe-b));
+  z-index:50;
+  display:none;
+}
+.bottom-nav-items{display:flex;justify-content:space-around}
+.bottom-nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 12px;border-radius:10px;cursor:pointer;
+  font-size:10px;font-weight:600;color:var(--text3);
+  transition:var(--t);
+}
+.bottom-nav-item.active{color:var(--accent2)}
+.bottom-nav-item .bni{font-size:20px}
+
+/* Responsive */
+@media(max-width:900px){
+  .sidebar{width:var(--sidebar-w-c)}
+  .sidebar .sidebar-brand,.sidebar .nav-label,.sidebar .sidebar-section-label{opacity:0;width:0}
+  .main-content{margin-left:var(--sidebar-w-c)}
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  .sidebar{display:none}
+  .main-content{margin-left:0}
+  .bottom-nav{display:block}
+  .view-container{padding-bottom:calc(80px + var(--safe-b))}
+  .grid-3,.grid-4{grid-template-columns:repeat(2,1fr)}
+  .grid-auto{grid-template-columns:repeat(2,1fr)}
+  .form-row,.form-row-3{grid-template-columns:1fr}
+  .topbar-toggle{display:none}
+}
+@media(max-width:400px){
+  .grid-2,.grid-3,.grid-4,.grid-auto{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app-shell" id="appShell">
+
+  <!-- ══ SIDEBAR ════════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <img src="icons/icon-192.png" alt="Logo" class="sidebar-logo" id="sidebarLogo"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+      <div class="sidebar-logo-fallback" style="display:none" id="sidebarLogoFallback">⭐</div>
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-name" id="sidebarCenterName">Don Bosco</div>
+        <div class="sidebar-brand-sub">Youth Center</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <div class="nav-item active" data-view="dashboard"><div class="nav-icon">🏠</div><div class="nav-label">Dashboard</div></div>
+      <div class="nav-item" data-view="students"><div class="nav-icon">👥</div><div class="nav-label">Students</div></div>
+      <div class="nav-item" data-view="admission"><div class="nav-icon">📝</div><div class="nav-label">New Admission</div></div>
+      <div class="nav-item" data-view="idcards"><div class="nav-icon">🪪</div><div class="nav-label">ID Cards</div></div>
+      <div class="sidebar-section-label">Manage</div>
+      <div class="nav-item" data-view="houses"><div class="nav-icon">🏠</div><div class="nav-label">Houses</div></div>
+      <div class="nav-item" data-view="attendance"><div class="nav-icon">📋</div><div class="nav-label">Attendance</div></div>
+      <div class="nav-item" data-view="reports"><div class="nav-icon">📊</div><div class="nav-label">Reports</div></div>
+      <div class="sidebar-section-label">System</div>
+      <div class="nav-item" data-view="settings"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="online-pill on" id="onlinePill"><div class="pulse"></div><span id="onlineText">Online</span></div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ═══════════════════════════════════════════════ -->
+  <div class="main-content" id="mainContent">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">☰</div>
+      <div>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-subtitle" id="topbarSub">Don Bosco Youth Center</div>
+      </div>
+      <div class="topbar-right">
+        <div class="gas-dot no" id="gasDot" title="Google Sheets connection"></div>
+        <div class="icon-btn" onclick="openModal('settingsModal')" title="Settings">⚙️</div>
+      </div>
+    </header>
+
+    <!-- VIEW CONTAINER -->
+    <div class="view-container">
+
+      <!-- ══ DASHBOARD ══════════════════════════════════════ -->
+      <div class="view active" id="view-dashboard">
+        <div class="page-header">
+          <div class="page-title">Good day! 👋</div>
+          <div class="page-sub" id="dashDate"></div>
+        </div>
+        <div class="grid-4" style="margin-bottom:20px" id="statsGrid">
+          <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-num" id="st-total">—</div><div class="stat-label">Total Students</div></div>
+          <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-num" id="st-active">—</div><div class="stat-label">Active</div></div>
+          <div class="stat-card"><div class="stat-icon">🏠</div><div class="stat-num" id="st-houses">—</div><div class="stat-label">Houses</div></div>
+          <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-num" id="st-todayAtt">—</div><div class="stat-label">Today's Attendance</div></div>
+        </div>
+        <div class="grid-2">
+          <!-- House Distribution -->
+          <div class="card">
+            <div class="section-title">🏠 House Distribution</div>
+            <div id="houseDist">
+              <div class="empty-state"><div class="ei">🏠</div><strong>No houses yet</strong><div>Add houses in Settings</div></div>
+            </div>
+          </div>
+          <!-- Recent Admissions -->
+          <div class="card">
+            <div class="section-title" style="justify-content:space-between">
+              <span>🆕 Recent Admissions</span>
+              <button class="btn btn-outline btn-xs" onclick="switchView('students')">View All →</button>
+            </div>
+            <div id="recentStudents">
+              <div class="empty-state"><div class="ei">📝</div><strong>No admissions yet</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STUDENTS ════════════════════════════════════════ -->
+      <div class="view" id="view-students">
+        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div><div class="page-title">Students</div><div class="page-sub" id="studentsCount">Loading…</div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="switchView('idcards')">🪪 ID Cards</button>
+            <button class="btn btn-primary btn-sm" onclick="switchView('admission')">📝 New Admission</button>
+          </div>
+        </div>
+        <!-- Filters -->
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <div class="search-bar" style="flex:1;min-width:200px">
+            <span>🔍</span>
+            <input type="text" id="studentSearch" placeholder="Search by name, ID…" oninput="filterStudents()"/>
+          </div>
+          <select class="form-select" id="houseFilter" style="width:160px" onchange="filterStudents()">
+            <option value="">All Houses</option>
+          </select>
+          <select class="form-select" id="statusFilter" style="width:130px" onchange="filterStudents()">
+            <option value="">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+          <div class="view-tabs" style="margin:0">
+            <div class="view-tab active" id="gridViewBtn" onclick="setStudentView('grid')">⊞</div>
+            <div class="view-tab" id="listViewBtn" onclick="setStudentView('list')">☰</div>
+          </div>
+        </div>
+        <!-- Grid -->
+        <div class="grid-auto" id="studentsGrid"></div>
+        <!-- List -->
+        <div class="table-wrap" id="studentsList" style="display:none">
+          <table class="data-table">
+            <thead><tr><th>Photo</th><th>Student ID</th><th>Name</th><th>House</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody id="studentsListBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ ADMISSION ═══════════════════════════════════════ -->
+      <div class="view" id="view-admission">
+        <div class="page-header">
+          <div class="page-title">New Admission</div>
+          <div class="page-sub">Register a new student</div>
+        </div>
+        <!-- Steps -->
+        <div class="steps" id="admissionSteps">
+          <div class="step active" id="step-0"><div class="step-dot active">1</div><div class="step-label">Photo</div></div>
+          <div class="step-line" id="sl-0"></div>
+          <div class="step" id="step-1"><div class="step-dot">2</div><div class="step-label">Details</div></div>
+          <div class="step-line" id="sl-1"></div>
+          <div class="step" id="step-2"><div class="step-dot">3</div><div class="step-label">House</div></div>
+          <div class="step-line" id="sl-2"></div>
+          <div class="step" id="step-3"><div class="step-dot">4</div><div class="step-label">Confirm</div></div>
+        </div>
+
+        <!-- Step 0: Photo -->
+        <div id="admStep0" class="card">
+          <div class="section-title">📷 Student Photo</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+            <div>
+              <div class="photo-capture-area" id="photoCaptureArea">
+                <div class="photo-capture-placeholder" id="photoPlaceholder">
+                  <div class="ph-icon">📷</div>
+                  <div style="font-size:13px">No photo yet</div>
+                  <div style="font-size:11px;margin-top:4px">Take a photo or upload</div>
+                </div>
+                <video id="photoVideo" style="display:none;width:100%;height:100%;object-fit:cover"></video>
+                <canvas id="photoCanvas" style="display:none;width:100%;height:100%;object-fit:cover"></canvas>
+                <img id="photoCaptured" style="display:none;width:100%;height:100%;object-fit:cover" alt="Student photo"/>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+                <button class="btn btn-primary btn-sm" id="cameraBtn" onclick="startCamera()">📷 Open Camera</button>
+                <button class="btn btn-success btn-sm" id="captureBtn" onclick="capturePhoto()" style="display:none">⚡ Capture</button>
+                <button class="btn btn-outline btn-sm" onclick="retakePhoto()" id="retakeBtn" style="display:none">🔄 Retake</button>
+                <label class="btn btn-outline btn-sm" style="cursor:pointer">
+                  📁 Upload
+                  <input type="file" accept="image/*" onchange="uploadPhotoFile(this)" style="display:none"/>
+                </label>
+              </div>
+            </div>
+            <div>
+              <div class="card card-sm" style="margin-bottom:10px">
+                <div style="font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:8px">📌 Photo Tips</div>
+                <ul style="font-size:12px;color:var(--text2);line-height:1.7;padding-left:16px">
+                  <li>Clear face, good lighting</li>
+                  <li>Plain background preferred</li>
+                  <li>Portrait orientation</li>
+                  <li>No sunglasses</li>
+                </ul>
+              </div>
+              <div id="photoThumb" style="display:none">
+                <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Preview:</div>
+                <img id="photoThumbImg" style="width:80px;height:100px;object-fit:cover;border-radius:8px;border:2px solid rgba(124,58,237,.4)" alt=""/>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:16px">
+            <button class="btn btn-primary" onclick="nextStep(1)">Next: Details →</button>
+          </div>
+        </div>
+
+        <!-- Step 1: Details -->
+        <div id="admStep1" class="card" style="display:none">
+          <div class="section-title">📋 Student Details</div>
+          <div id="dynamicFormContainer"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:16px">
+            <button class="btn btn-outline" onclick="nextStep(0)">← Back</button>
+            <button class="btn btn-primary" onclick="nextStep(2)">Next: House →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: House -->
+        <div id="admStep2" class="card" style="display:none">
+          <div class="section-title">🏠 Assign House</div>
+          <div id="housePickerGrid" class="grid-3" style="margin-bottom:16px"></div>
+          <div style="display:flex;justify-content:space-between">
+            <button class="btn btn-outline" onclick="nextStep(1)">← Back</button>
+            <button class="btn btn-primary" onclick="nextStep(3)">Next: Confirm →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Confirm -->
+        <div id="admStep3" class="card" style="display:none">
+          <div class="section-title">✅ Confirm Admission</div>
+          <div id="admissionSummary" class="grid-2" style="gap:16px;margin-bottom:16px"></div>
+          <div style="display:flex;justify-content:space-between">
+            <button class="btn btn-outline" onclick="nextStep(2)">← Back</button>
+            <button class="btn btn-gold" onclick="submitAdmission()" id="submitAdmBtn">🎓 Confirm Admission</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ID CARDS ════════════════════════════════════════ -->
+      <div class="view" id="view-idcards">
+        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div><div class="page-title">ID Cards</div><div class="page-sub">Generate and print QR student ID cards</div></div>
+          <button class="btn btn-warning btn-sm" style="background:linear-gradient(135deg,var(--gold),#d97706);color:#000" onclick="printSelectedCards()">🖨️ Print Selected</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <div class="search-bar" style="flex:1;min-width:180px">
+            <span>🔍</span>
+            <input type="text" id="cardSearch" placeholder="Search student…" oninput="filterCards()"/>
+          </div>
+          <select class="form-select" id="cardHouseFilter" style="width:160px" onchange="filterCards()">
+            <option value="">All Houses</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="selectAllCards()">Select All</button>
+          <button class="btn btn-outline btn-sm" onclick="clearCardSelection()">Clear</button>
+        </div>
+        <div class="grid-auto" id="idCardsGrid"></div>
+      </div>
+
+      <!-- ══ HOUSES ══════════════════════════════════════════ -->
+      <div class="view" id="view-houses">
+        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div><div class="page-title">Houses</div><div class="page-sub">Manage student houses</div></div>
+          <button class="btn btn-primary btn-sm" onclick="openAddHouseModal()">➕ Add House</button>
+        </div>
+        <div class="grid-3" id="housesGrid"></div>
+      </div>
+
+      <!-- ══ ATTENDANCE ══════════════════════════════════════ -->
+      <div class="view" id="view-attendance">
+        <div class="page-header">
+          <div class="page-title">Attendance</div>
+          <div class="page-sub">QR code scanner for marking attendance</div>
+        </div>
+        <div class="view-tabs" id="attTabs">
+          <div class="view-tab active" onclick="setAttTab('scanner')">📷 Scanner</div>
+          <div class="view-tab" onclick="setAttTab('sessions')">📋 Sessions</div>
+        </div>
+
+        <!-- Scanner tab -->
+        <div id="attTabScanner">
+          <div id="attNoSession" class="card" style="margin-bottom:16px">
+            <div class="section-title">🚀 Start Attendance Session</div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Subject / Event</label><input class="form-input" id="sessionTitle" placeholder="e.g., Morning Prayer"/></div>
+              <div class="form-group"><label class="form-label">Teacher / In-charge</label><input class="form-input" id="sessionTeacher" placeholder="Name"/></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="sessionDate" type="date"/></div>
+              <div class="form-group"><label class="form-label">Period</label><input class="form-input" id="sessionPeriod" placeholder="e.g., Period 1"/></div>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="startAttSession()">📷 Start Scanning</button>
+          </div>
+
+          <div id="attActiveSession" style="display:none">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+              <div style="flex:1">
+                <div style="font-size:16px;font-weight:700;color:var(--text)" id="attSessionName">Session</div>
+                <div style="font-size:11px;color:var(--text3)" id="attSessionMeta"></div>
+              </div>
+              <span style="background:rgba(34,211,165,.15);color:var(--green);border:1px solid rgba(34,211,165,.3);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700" id="attCountBadge">0 scanned</span>
+              <button class="btn btn-danger btn-sm" onclick="endAttSession()">🏁 End Session</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+              <div>
+                <div class="scanner-box">
+                  <div class="scanner-box-hdr">
+                    <span class="scanner-box-title">📷 QR Scanner</span>
+                    <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--green)"><div class="pulse" style="background:var(--green)"></div>Scanning</div>
+                  </div>
+                  <div style="position:relative">
+                    <div id="qr-reader"></div>
+                    <div class="scan-overlay"><div class="scan-line"></div></div>
+                  </div>
+                </div>
+                <div class="last-scan" id="lastScan">
+                  <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div><div style="font-size:14px;font-weight:700;color:var(--text)" id="lsName">—</div><div style="font-size:11px;color:var(--text2)" id="lsMeta">—</div></div>
+                    <span id="lsHouse" class="badge"></span>
+                  </div>
+                  <div style="font-size:11px;font-weight:600;margin-top:5px" id="lsStatus"></div>
+                </div>
+              </div>
+              <div class="card card-sm">
+                <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px">✅ Present List</div>
+                <div style="max-height:340px;overflow-y:auto" id="attLiveList">
+                  <div class="empty-state" id="attEmpty" style="padding:16px"><div class="ei" style="font-size:32px">👆</div><div style="font-size:12px">Scan a student's QR card</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sessions tab -->
+        <div id="attTabSessions" style="display:none">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Date</th><th>Subject</th><th>Teacher</th><th>Count</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="sessionsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ REPORTS ════════════════════════════════════════ -->
+      <div class="view" id="view-reports">
+        <div class="page-header">
+          <div class="page-title">Reports</div>
+          <div class="page-sub">Student and attendance analytics</div>
+        </div>
+        <div class="view-tabs">
+          <div class="view-tab active" onclick="setReportTab('overview')">Overview</div>
+          <div class="view-tab" onclick="setReportTab('attendance')">Attendance</div>
+          <div class="view-tab" onclick="setReportTab('houses')">Houses</div>
+        </div>
+        <div id="reportContent">
+          <div class="grid-3" style="margin-bottom:20px">
+            <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-num" id="rp-total">—</div><div class="stat-label">Total Students</div></div>
+            <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-num" id="rp-sessions">—</div><div class="stat-label">Total Sessions</div></div>
+            <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-num" id="rp-att">—</div><div class="stat-label">Total Scans</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="section-title">🏠 Students per House</div>
+              <div id="rp-houseBars"></div>
+            </div>
+            <div class="card">
+              <div class="section-title">📋 Recent Sessions</div>
+              <div id="rp-recentSessions"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SETTINGS ════════════════════════════════════════ -->
+      <div class="view" id="view-settings">
+        <div class="page-header">
+          <div class="page-title">Settings</div>
+          <div class="page-sub">Configure your system</div>
+        </div>
+        <div class="settings-tabs">
+          <div class="settings-tab active" onclick="setSettingsTab('general')">🏫 General</div>
+          <div class="settings-tab" onclick="setSettingsTab('images')">🖼️ Images</div>
+          <div class="settings-tab" onclick="setSettingsTab('fields')">📋 Student Fields</div>
+          <div class="settings-tab" onclick="setSettingsTab('houses')">🏠 Houses</div>
+          <div class="settings-tab" onclick="setSettingsTab('connection')">🔌 Connection</div>
+        </div>
+
+        <!-- General -->
+        <div class="settings-panel active card" id="sp-general">
+          <div class="section-title">🏫 Center Information</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Center Name</label><input class="form-input" id="set-centerName" placeholder="Don Bosco Youth Center"/></div>
+            <div class="form-group"><label class="form-label">Student ID Prefix</label><input class="form-input" id="set-idPrefix" placeholder="DB" style="text-transform:uppercase"/></div>
+          </div>
+          <div class="form-group"><label class="form-label">Address</label><textarea class="form-textarea" id="set-address" placeholder="Full address…" style="min-height:60px"></textarea></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="set-phone" type="tel" placeholder="+91 xxxxx xxxxx"/></div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="set-email" type="email" placeholder="info@donbosco.org"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Founder / Director Name</label><input class="form-input" id="set-founderName" placeholder="Fr. John Doe"/></div>
+            <div class="form-group"><label class="form-label">Founder Title</label><input class="form-input" id="set-founderTitle" placeholder="Director"/></div>
+          </div>
+          <button class="btn btn-primary" onclick="saveGeneralSettings()">💾 Save Settings</button>
+        </div>
+
+        <!-- Images -->
+        <div class="settings-panel card" id="sp-images">
+          <div class="section-title">🖼️ Center Images</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Center Logo</label>
+              <div class="upload-zone" id="logoZone" onclick="triggerUpload('logo')">
+                <img id="logoPreview" class="upload-preview" style="display:none" alt="Logo"/>
+                <div id="logoPlaceholder">
+                  <div style="font-size:32px">🏫</div>
+                  <div style="font-size:13px;color:var(--text2);margin-top:6px">Click to upload logo</div>
+                  <div style="font-size:11px;color:var(--text3)">PNG, JPG — recommended square</div>
+                </div>
+              </div>
+              <input type="file" id="logoFileInput" accept="image/*" style="display:none" onchange="handleAssetUpload('logo',this)"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Founder / Director Photo</label>
+              <div class="upload-zone" id="founderZone" onclick="triggerUpload('founder')">
+                <img id="founderPreview" class="upload-preview" style="display:none;border-radius:50%" alt="Founder"/>
+                <div id="founderPlaceholder">
+                  <div style="font-size:32px">👤</div>
+                  <div style="font-size:13px;color:var(--text2);margin-top:6px">Click to upload photo</div>
+                  <div style="font-size:11px;color:var(--text3)">PNG, JPG — portrait preferred</div>
+                </div>
+              </div>
+              <input type="file" id="founderFileInput" accept="image/*" style="display:none" onchange="handleAssetUpload('founder',this)"/>
+            </div>
+          </div>
+          <div class="form-hint" style="margin-top:8px">Images are uploaded to Google Drive and displayed as thumbnails throughout the app.</div>
+        </div>
+
+        <!-- Student Fields -->
+        <div class="settings-panel" id="sp-fields">
+          <div class="card" style="margin-bottom:16px">
+            <div class="section-title" style="justify-content:space-between">
+              <span>📋 Student Form Fields</span>
+              <button class="btn btn-primary btn-sm" onclick="openAddFieldModal()">➕ Add Field</button>
+            </div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Drag to reorder fields. These fields appear in the student admission form.</div>
+            <div id="fieldsBuilder" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+        </div>
+
+        <!-- Houses (in Settings) -->
+        <div class="settings-panel" id="sp-houses">
+          <div class="card">
+            <div class="section-title" style="justify-content:space-between">
+              <span>🏠 Manage Houses</span>
+              <button class="btn btn-primary btn-sm" onclick="openAddHouseModal()">➕ Add House</button>
+            </div>
+            <div id="settingsHousesList" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+        </div>
+
+        <!-- Connection -->
+        <div class="settings-panel card" id="sp-connection">
+          <div class="section-title">🔌 Google Apps Script Connection</div>
+          <div class="form-group">
+            <label class="form-label">GAS Web App URL</label>
+            <input class="form-input" id="gasUrlInput" type="url" placeholder="https://script.google.com/macros/s/AKfycbycBBbqySl5A9M_-kM7GSurveef_abXuQ-jfx53N7574KtZCF814D1kUnuMY_mRQeIG/exec"/>
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">
+            Deploy your <code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:3px">Code.gs</code> as a Web App (Execute as: Me, Access: Anyone) and paste the URL above.
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="testConnection()">🔌 Test Connection</button>
+            <button class="btn btn-primary" onclick="saveGasUrl()">💾 Save & Connect</button>
+          </div>
+          <div id="connTestResult" style="margin-top:10px;font-size:12px;display:none;padding:10px;border-radius:var(--rs)"></div>
+        </div>
+      </div>
+
+    </div><!-- /view-container -->
+  </div><!-- /main-content -->
+</div><!-- /app-shell -->
+
+<!-- ══ BOTTOM NAV (mobile) ════════════════════════════════ -->
+<nav class="bottom-nav" id="bottomNav">
+  <div class="bottom-nav-items">
+    <div class="bottom-nav-item active" onclick="switchView('dashboard')"><div class="bni">🏠</div><div>Home</div></div>
+    <div class="bottom-nav-item" onclick="switchView('students')"><div class="bni">👥</div><div>Students</div></div>
+    <div class="bottom-nav-item" onclick="switchView('admission')"><div class="bni">📝</div><div>Admit</div></div>
+    <div class="bottom-nav-item" onclick="switchView('attendance')"><div class="bni">📋</div><div>Attend</div></div>
+    <div class="bottom-nav-item" onclick="switchView('settings')"><div class="bni">⚙️</div><div>Settings</div></div>
+  </div>
+</nav>
+
+<!-- ══ MODALS ════════════════════════════════════════════ -->
+
+<!-- Settings quick modal -->
+<div class="modal-mask" id="settingsModal">
+  <div class="modal sm">
+    <div class="modal-title">⚙️ Quick Settings <span class="modal-close" onclick="closeModal('settingsModal')">✕</span></div>
+    <div class="form-group">
+      <label class="form-label">GAS Web App URL</label>
+      <input class="form-input" id="qsGasUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" style="font-size:11px"/>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:12px">Paste your deployed Google Apps Script URL</div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('settingsModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveQuickSettings()">💾 Save & Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- Student Profile Modal -->
+<div class="modal-mask" id="studentModal">
+  <div class="modal lg">
+    <div class="modal-title">👤 Student Profile <span class="modal-close" onclick="closeModal('studentModal')">✕</span></div>
+    <div id="studentProfileContent"></div>
+    <div class="modal-footer" id="studentProfileFooter"></div>
+  </div>
+</div>
+
+<!-- Add/Edit House Modal -->
+<div class="modal-mask" id="houseModal">
+  <div class="modal sm">
+    <div class="modal-title" id="houseModalTitle">🏠 Add House <span class="modal-close" onclick="closeModal('houseModal')">✕</span></div>
+    <div class="form-group"><label class="form-label">House Name<span class="req">*</span></label><input class="form-input" id="hmName" placeholder="e.g., Red House"/></div>
+    <div class="form-group"><label class="form-label">Icon (emoji)</label><input class="form-input" id="hmIcon" placeholder="🏠" style="font-size:20px" maxlength="2"/></div>
+    <div class="form-group">
+      <label class="form-label">Color</label>
+      <div class="color-swatches" id="colorSwatches"></div>
+      <input type="color" id="hmColor" value="#7c3aed" style="width:100%;height:36px;border:1px solid var(--card-b);border-radius:var(--rs);background:transparent;margin-top:6px"/>
+    </div>
+    <div class="form-group"><label class="form-label">House Leader</label><input class="form-input" id="hmLeader" placeholder="Leader name (optional)"/></div>
+    <input type="hidden" id="hmEditId"/>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('houseModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveHouse()">💾 Save House</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Field Modal -->
+<div class="modal-mask" id="fieldModal">
+  <div class="modal sm">
+    <div class="modal-title" id="fieldModalTitle">📋 Add Field <span class="modal-close" onclick="closeModal('fieldModal')">✕</span></div>
+    <div class="form-group"><label class="form-label">Field Label<span class="req">*</span></label><input class="form-input" id="fmLabel" placeholder="e.g., Full Name"/></div>
+    <div class="form-group">
+      <label class="form-label">Field Type</label>
+      <select class="form-select" id="fmType" onchange="toggleFieldOptions()">
+        <option value="text">Text</option>
+        <option value="number">Number</option>
+        <option value="date">Date</option>
+        <option value="email">Email</option>
+        <option value="phone">Phone</option>
+        <option value="select">Dropdown (Select)</option>
+        <option value="textarea">Textarea</option>
+      </select>
+    </div>
+    <div class="form-group" id="fmOptionsGroup" style="display:none">
+      <label class="form-label">Options (comma-separated)</label>
+      <input class="form-input" id="fmOptions" placeholder="Option 1,Option 2,Option 3"/>
+      <div class="form-hint">e.g., Male,Female,Other</div>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:10px">
+      <input type="checkbox" id="fmRequired" style="width:16px;height:16px;accent-color:var(--accent)"/>
+      <label for="fmRequired" style="font-size:13px;color:var(--text2);cursor:pointer">Required field</label>
+    </div>
+    <input type="hidden" id="fmEditId"/>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('fieldModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveField()">💾 Save Field</button>
+    </div>
+  </div>
+</div>
+
+<!-- ID Card Preview Modal -->
+<div class="modal-mask" id="idCardModal">
+  <div class="modal md">
+    <div class="modal-title">🪪 ID Card Preview <span class="modal-close" onclick="closeModal('idCardModal')">✕</span></div>
+    <div id="idCardPreviewArea" style="display:flex;justify-content:center;margin-bottom:16px;overflow-x:auto;padding:10px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('idCardModal')">Close</button>
+      <button class="btn btn-primary" onclick="printSingleCard()">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Loading…</div>
+</div>
+
+<!-- Toast -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Print area -->
+<div id="print-area"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  CONFIGURATION
+// ════════════════════════════════════════════════════════════
+let GAS_URL      = localStorage.getItem('db-gas-url') || '';
+let gasConnected = false;
+let sidebarCollapsed = false;
+
+// App state
+let allStudents  = [];
+let allHouses    = [];
+let allFields    = [];
+let allSessions  = [];
+let appSettings  = {};
+let currentView  = 'dashboard';
+
+// Admission state
+let admStep        = 0;
+let admPhoto       = null;   // base64
+let admPhotoMime   = 'image/jpeg';
+let admFieldData   = {};
+let admHouseId     = null;
+let admCameraStream= null;
+let admNewStudentId= null;
+
+// Attendance state
+let attSession   = null;
+let attList      = [];
+let attDups      = 0;
+let qrScanner    = null;
+let scanCooldown = false;
+
+// ID card selection
+let selectedCards = new Set();
+let currentCardStudent = null;
+
+// ════════════════════════════════════════════════════════════
+//  API
+// ════════════════════════════════════════════════════════════
+async function api(params) {
+  if (!GAS_URL) return { error: 'GAS URL not set' };
+  try {
+    const url = new URL(GAS_URL);
+    Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
+    const res  = await fetch(url.toString(), { redirect: 'follow' });
+    return await res.json();
+  } catch(e) {
+    return { error: e.message, offline: !navigator.onLine };
+  }
+}
+
+async function apiPost(data) {
+  if (!GAS_URL) return { error: 'GAS URL not set' };
+  try {
+    const res = await fetch(GAS_URL, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify(data),
+      redirect:'follow'
+    });
+    return await res.json();
+  } catch(e) {
+    return { error: e.message };
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════════════════
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-item').forEach(n => n.classList.remove('active'));
+
+  const view = document.getElementById('view-' + name);
+  if (view) view.classList.add('active');
+
+  const navItem = document.querySelector(`.nav-item[data-view="${name}"]`);
+  if (navItem) navItem.classList.add('active');
+
+  currentView = name;
+  const titles = { dashboard:'Dashboard',students:'Students',admission:'New Admission',idcards:'ID Cards',houses:'Houses',attendance:'Attendance',reports:'Reports',settings:'Settings' };
+  document.getElementById('topbarTitle').textContent = titles[name] || name;
+
+  // Load data for view
+  if (name === 'dashboard')   loadDashboard();
+  if (name === 'students')    loadStudents();
+  if (name === 'idcards')     loadIDCards();
+  if (name === 'houses')      loadHousesView();
+  if (name === 'attendance')  loadSessionsTab();
+  if (name === 'reports')     loadReports();
+  if (name === 'settings')    loadSettingsView();
+  if (name === 'admission')   initAdmission();
+
+  window.scrollTo(0,0);
+}
+
+// Sidebar nav items
+document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+  item.addEventListener('click', () => switchView(item.dataset.view));
+});
+
+function toggleSidebar() {
+  sidebarCollapsed = !sidebarCollapsed;
+  document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+  document.getElementById('mainContent').classList.toggle('sidebar-collapsed', sidebarCollapsed);
+}
+
+// ════════════════════════════════════════════════════════════
+//  MODALS
+// ════════════════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ════════════════════════════════════════════════════════════
+//  LOADING
+// ════════════════════════════════════════════════════════════
+function showLoading(txt='Loading…') {
+  document.getElementById('loadingText').textContent = txt;
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+
+// ════════════════════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════════════════════
+function toast(icon, msg, type='ok') {
+  const wrap  = document.getElementById('toastWrap');
+  const el    = document.createElement('div');
+  el.className = 'toast';
+  const col = {ok:'rgba(34,211,165,.3)',warn:'rgba(251,191,36,.3)',err:'rgba(248,113,113,.3)'}[type]||'rgba(34,211,165,.3)';
+  el.style.borderColor = col;
+  el.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  wrap.appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, 3000);
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONNECTION
+// ════════════════════════════════════════════════════════════
+async function checkConnection() {
+  const dot = document.getElementById('gasDot');
+  if (!GAS_URL) { dot.className='gas-dot no'; gasConnected=false; return; }
+  dot.className = 'gas-dot checking';
+  const r = await api({ action:'ping' });
+  gasConnected = r.ok === true;
+  dot.className = gasConnected ? 'gas-dot ok' : 'gas-dot no';
+  if (gasConnected) loadAppData();
+}
+
+async function testConnection() {
+  const url = document.getElementById('gasUrlInput').value.trim();
+  if (!url) { toast('⚠️','Enter URL first','warn'); return; }
+  const res  = document.getElementById('connTestResult');
+  res.style.display = 'block';
+  res.textContent   = '⏳ Testing…';
+  res.style.background = 'rgba(255,255,255,.05)';
+  const old = GAS_URL; GAS_URL = url;
+  const r = await api({ action:'ping' });
+  GAS_URL = old;
+  if (r.ok) {
+    res.textContent = '✅ Connected! GAS is responding.';
+    res.style.background = 'rgba(34,211,165,.1)';
+  } else {
+    res.textContent = '❌ Failed: ' + (r.error||'No response');
+    res.style.background = 'rgba(248,113,113,.1)';
+  }
+}
+
+function saveGasUrl() {
+  GAS_URL = document.getElementById('gasUrlInput').value.trim();
+  localStorage.setItem('db-gas-url', GAS_URL);
+  toast('💾','URL saved! Testing connection…','ok');
+  checkConnection();
+}
+
+function saveQuickSettings() {
+  GAS_URL = document.getElementById('qsGasUrl').value.trim();
+  localStorage.setItem('db-gas-url', GAS_URL);
+  closeModal('settingsModal');
+  toast('💾','Saved!','ok');
+  checkConnection();
+}
+
+// ════════════════════════════════════════════════════════════
+//  DATA LOADING
+// ════════════════════════════════════════════════════════════
+async function loadAppData() {
+  const [hr, fr, sr] = await Promise.all([
+    api({action:'getHouses'}),
+    api({action:'getFields'}),
+    api({action:'getSettings'}),
+  ]);
+  if (hr.houses)   allHouses   = hr.houses;
+  if (fr.fields)   allFields   = fr.fields;
+  if (sr.settings) appSettings = sr.settings;
+  populateHouseFilters();
+  applyCenterBranding();
+  if (currentView === 'dashboard')  loadDashboard();
+  if (currentView === 'students')   loadStudents();
+  if (currentView === 'settings')   loadSettingsView();
+}
+
+function populateHouseFilters() {
+  const opts = allHouses.map(h => `<option value="${h.HouseID}">${h.Name}</option>`).join('');
+  ['houseFilter','cardHouseFilter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<option value="">All Houses</option>' + opts;
+  });
+}
+
+function applyCenterBranding() {
+  const name = appSettings.centerName || 'Don Bosco';
+  document.getElementById('sidebarCenterName').textContent = name;
+  document.getElementById('topbarSub').textContent = name + ' Youth Center';
+  if (appSettings.logoUrl) {
+    const img = document.getElementById('sidebarLogo');
+    img.src = appSettings.logoUrl;
+    img.style.display = 'block';
+    document.getElementById('sidebarLogoFallback').style.display = 'none';
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════════════════
+async function loadDashboard() {
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  if (!gasConnected) return;
+  const r = await api({action:'getStats'});
+  if (r.error) return;
+  document.getElementById('st-total').textContent   = r.totalStudents   || 0;
+  document.getElementById('st-active').textContent  = r.activeStudents  || 0;
+  document.getElementById('st-houses').textContent  = r.totalHouses     || 0;
+  document.getElementById('st-todayAtt').textContent= r.todayAttendance || 0;
+
+  // House distribution
+  const hd = document.getElementById('houseDist');
+  if (r.houseDist && r.houseDist.length) {
+    const max = Math.max(...r.houseDist.map(h=>h.count), 1);
+    hd.innerHTML = r.houseDist.map(h => `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+          <span style="font-weight:600;color:var(--text)">${h.name}</span>
+          <span style="color:var(--text2)">${h.count} students</span>
+        </div>
+        <div class="report-bar"><div class="report-bar-fill" style="width:${Math.round(h.count/max*100)}%;background:${h.color}"></div></div>
+      </div>`).join('');
+  } else { hd.innerHTML = '<div class="empty-state"><div class="ei">🏠</div><strong>No houses yet</strong><div>Add houses in Settings</div></div>'; }
+
+  // Recent students
+  const rs = document.getElementById('recentStudents');
+  if (r.recentStudents && r.recentStudents.length) {
+    rs.innerHTML = r.recentStudents.map(s => {
+      const name    = getStudentName(s.fieldData);
+      const house   = allHouses.find(h => h.HouseID === s.houseId);
+      const initial = getInitials(name);
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--card-b)">
+        ${s.photoUrl
+          ? `<img src="${s.photoUrl}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" alt=""/>`
+          : `<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${initial}</div>`}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${name||s.id}</div>
+          <div style="font-size:10px;color:var(--text3)">${s.id}</div>
+        </div>
+        ${house?`<span class="badge" style="background:${house.Color}22;color:${house.Color};border:1px solid ${house.Color}44">${house.Name}</span>`:''}
+      </div>`;
+    }).join('');
+  } else { rs.innerHTML = '<div class="empty-state"><div class="ei">📝</div><strong>No admissions yet</strong></div>'; }
+}
+
+// ════════════════════════════════════════════════════════════
+//  STUDENTS
+// ════════════════════════════════════════════════════════════
+let studentsViewMode = 'grid';
+
+async function loadStudents() {
+  if (!gasConnected) { showOfflineMsg('studentsGrid'); return; }
+  showLoading('Loading students…');
+  const r = await api({action:'getStudents'});
+  hideLoading();
+  if (r.error) { toast('❌',r.error,'err'); return; }
+  allStudents = r.students || [];
+  document.getElementById('studentsCount').textContent = `${allStudents.length} students registered`;
+  renderStudents(allStudents);
+}
+
+function renderStudents(list) {
+  const nameField = allFields.find(f => f.Label && f.Label.toLowerCase().includes('name'));
+  if (studentsViewMode === 'grid') {
+    const grid = document.getElementById('studentsGrid');
+    if (!list.length) { grid.innerHTML = emptyState('👥','No students found','Try adjusting your filters'); return; }
+    grid.innerHTML = list.map(s => {
+      const name  = getStudentName(s.fieldData);
+      const house = allHouses.find(h => h.HouseID === s.HouseID);
+      const init  = getInitials(name);
+      return `<div class="student-card" onclick="viewStudent('${s.StudentID}')">
+        ${house?`<div class="house-stripe" style="background:${house.Color}"></div>`:''}
+        ${s.photoUrl
+          ? `<img src="${s.photoUrl}" class="student-photo" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/><div class="student-avatar" style="display:none">${init}</div>`
+          : `<div class="student-avatar">${init}</div>`}
+        <div class="student-name">${name||'Unknown'}</div>
+        <div class="student-id">${s.StudentID}</div>
+        ${house?`<span class="badge" style="background:${house.Color}22;color:${house.Color};border:1px solid ${house.Color}44">${house.Icon||'🏠'} ${house.Name}</span>`:'<span class="badge badge-inactive">No House</span>'}
+        <span class="badge ${s.Status==='Active'?'badge-active':'badge-inactive'}">${s.Status||'Active'}</span>
+        <div class="student-actions">
+          <button class="btn btn-outline btn-xs" style="flex:1" onclick="event.stopPropagation();editStudent('${s.StudentID}')">✏️</button>
+          <button class="btn btn-primary btn-xs" style="flex:1" onclick="event.stopPropagation();showIDCard('${s.StudentID}')">🪪</button>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    const tbody = document.getElementById('studentsListBody');
+    tbody.innerHTML = list.map(s => {
+      const name  = getStudentName(s.fieldData);
+      const house = allHouses.find(h => h.HouseID === s.HouseID);
+      const init  = getInitials(name);
+      return `<tr onclick="viewStudent('${s.StudentID}')" style="cursor:pointer">
+        <td>${s.photoUrl?`<img src="${s.photoUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover" alt=""/>`:`<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff">${init}</div>`}</td>
+        <td><code style="font-size:11px">${s.StudentID}</code></td>
+        <td><strong>${name||'—'}</strong></td>
+        <td>${house?`<span style="color:${house.Color};font-weight:600">${house.Icon||'🏠'} ${house.Name}</span>`:'—'}</td>
+        <td><span class="badge ${s.Status==='Active'?'badge-active':'badge-inactive'}">${s.Status||'Active'}</span></td>
+        <td style="color:var(--text3)">${s.CreatedAt?new Date(s.CreatedAt).toLocaleDateString('en-IN'):'—'}</td>
+        <td><div style="display:flex;gap:5px"><button class="btn btn-outline btn-xs" onclick="event.stopPropagation();editStudent('${s.StudentID}')">✏️</button><button class="btn btn-primary btn-xs" onclick="event.stopPropagation();showIDCard('${s.StudentID}')">🪪</button></div></td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function filterStudents() {
+  const q      = (document.getElementById('studentSearch').value||'').toLowerCase();
+  const house  = document.getElementById('houseFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  let list = allStudents;
+  if (q)      list = list.filter(s => s.StudentID.toLowerCase().includes(q) || JSON.stringify(s.fieldData||{}).toLowerCase().includes(q));
+  if (house)  list = list.filter(s => s.HouseID === house);
+  if (status) list = list.filter(s => (s.Status||'Active') === status);
+  renderStudents(list);
+}
+
+function setStudentView(mode) {
+  studentsViewMode = mode;
+  document.getElementById('studentsGrid').style.display  = mode==='grid'?'grid':'none';
+  document.getElementById('studentsList').style.display  = mode==='list'?'block':'none';
+  document.getElementById('gridViewBtn').classList.toggle('active', mode==='grid');
+  document.getElementById('listViewBtn').classList.toggle('active', mode==='list');
+  filterStudents();
+}
+
+async function viewStudent(id) {
+  const r = await api({action:'getStudent',id});
+  if (r.error||!r.student) { toast('❌','Could not load student','err'); return; }
+  const s     = r.student;
+  const house = allHouses.find(h => h.HouseID === s.HouseID);
+  const name  = getStudentName(s.fieldData);
+  const init  = getInitials(name);
+
+  document.getElementById('studentProfileContent').innerHTML = `
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+      <div style="flex-shrink:0;text-align:center">
+        ${s.photoUrlLarge
+          ? `<img src="${s.photoUrlLarge}" style="width:120px;height:150px;border-radius:12px;object-fit:cover;border:2px solid rgba(124,58,237,.4)" alt="${name}"/>`
+          : `<div style="width:120px;height:150px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:800;color:#fff">${init}</div>`}
+        <div style="margin-top:8px;font-size:11px;color:var(--text3)">
+          <code>${s.StudentID}</code>
+        </div>
+        ${house?`<span class="badge" style="background:${house.Color}22;color:${house.Color};border:1px solid ${house.Color}44;margin-top:6px">${house.Icon||'🏠'} ${house.Name}</span>`:''}
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px">${name||'Unknown'}</div>
+        <span class="badge ${s.Status==='Active'?'badge-active':'badge-inactive'}" style="margin-bottom:12px">${s.Status||'Active'}</span>
+        <div class="profile-grid">
+          ${allFields.filter(f=>f.Active!=='false').map(f => {
+            const val = (s.fieldData||{})[f.FieldID] || '—';
+            return `<div class="profile-field"><div class="profile-field-label">${f.Label}</div><div class="profile-field-value">${val}</div></div>`;
+          }).join('')}
+          <div class="profile-field"><div class="profile-field-label">Joined</div><div class="profile-field-value">${s.CreatedAt?new Date(s.CreatedAt).toLocaleDateString('en-IN'):'—'}</div></div>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('studentProfileFooter').innerHTML = `
+    <button class="btn btn-outline btn-sm" onclick="closeModal('studentModal')">Close</button>
+    <button class="btn btn-outline btn-sm" onclick="closeModal('studentModal');editStudent('${s.StudentID}')">✏️ Edit</button>
+    <button class="btn btn-primary btn-sm" onclick="closeModal('studentModal');showIDCard('${s.StudentID}')">🪪 ID Card</button>`;
+
+  openModal('studentModal');
+}
+
+async function editStudent(id) {
+  const r = await api({action:'getStudent',id});
+  if (!r.student) { toast('❌','Not found','err'); return; }
+  // Simple edit: change house & status
+  const s     = r.student;
+  const house = allHouses.find(h=>h.HouseID===s.HouseID);
+  const name  = getStudentName(s.fieldData);
+  const houseOpts = allHouses.map(h=>`<option value="${h.HouseID}" ${h.HouseID===s.HouseID?'selected':''}>${h.Name}</option>`).join('');
+  document.getElementById('studentProfileContent').innerHTML = `
+    <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)">${name} — ${s.StudentID}</div>
+    <div class="form-group"><label class="form-label">House</label>
+    <select class="form-select" id="editHouse"><option value="">No House</option>${houseOpts}</select></div>
+    <div class="form-group"><label class="form-label">Status</label>
+    <select class="form-select" id="editStatus">
+      <option value="Active" ${s.Status==='Active'?'selected':''}>Active</option>
+      <option value="Inactive" ${s.Status==='Inactive'?'selected':''}>Inactive</option>
+    </select></div>
+    <div style="margin-top:4px;font-size:12px;color:var(--text3)">Note: Field data editing coming soon. You can change house and status here.</div>`;
+  document.getElementById('studentProfileFooter').innerHTML = `
+    <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.StudentID}')">🗑️ Delete</button>
+    <button class="btn btn-outline btn-sm" onclick="closeModal('studentModal')">Cancel</button>
+    <button class="btn btn-primary btn-sm" onclick="saveStudentEdit('${s.StudentID}')">💾 Save</button>`;
+  openModal('studentModal');
+}
+
+async function saveStudentEdit(id) {
+  const houseId = document.getElementById('editHouse').value;
+  const status  = document.getElementById('editStatus').value;
+  showLoading('Saving…');
+  const r = await apiPost({action:'updateStudent',id,houseId,status});
+  hideLoading();
+  if (r.ok) { toast('✅','Student updated','ok'); closeModal('studentModal'); loadStudents(); }
+  else toast('❌',r.error||'Error','err');
+}
+
+async function deleteStudent(id) {
+  if (!confirm('Delete this student? This cannot be undone.')) return;
+  showLoading('Deleting…');
+  const r = await apiPost({action:'deleteStudent',id});
+  hideLoading();
+  if (r.ok) { toast('🗑️','Student deleted','ok'); closeModal('studentModal'); loadStudents(); }
+  else toast('❌',r.error||'Error','err');
+}
+
+// ════════════════════════════════════════════════════════════
+//  ADMISSION (MULTI-STEP)
+// ════════════════════════════════════════════════════════════
+function initAdmission() {
+  admStep = 0; admPhoto = null; admFieldData = {}; admHouseId = null;
+  stopCamera();
+  renderAdmissionStep(0);
+  renderDynamicForm();
+  renderHousePicker();
+}
+
+function renderAdmissionStep(step) {
+  for (let i=0;i<4;i++) {
+    const st = document.getElementById('admStep'+i);
+    if (st) st.style.display = i===step?'block':'none';
+    const sd = document.getElementById('step-'+i);
+    if (sd) {
+      sd.querySelector('.step-dot').className = `step-dot ${i<step?'done':i===step?'active':''}`;
+      sd.className = `step ${i<step?'done':i===step?'active':''}`;
+    }
+    const sl = document.getElementById('sl-'+i);
+    if (sl) sl.className = `step-line ${i<step?'done':''}`;
+  }
+}
+
+function nextStep(to) {
+  if (to === 2 && !admFieldData) admFieldData = collectFormData();
+  if (to > admStep) {
+    if (to === 1) { /* photo step — always ok */ }
+    if (to === 2) { admFieldData = collectFormData(); if (!admFieldData) return; }
+    if (to === 3) { renderAdmissionSummary(); }
+  }
+  admStep = to;
+  renderAdmissionStep(to);
+}
+
+function collectFormData() {
+  const data = {};
+  let valid = true;
+  allFields.filter(f=>f.Active!=='false').forEach(f => {
+    const el = document.querySelector(`[name="${f.FieldID}"]`);
+    if (!el) return;
+    const val = el.value.trim();
+    if (f.Required==='true' && !val) {
+      el.style.borderColor='var(--red)';
+      toast('⚠️',`${f.Label} is required`,'warn');
+      valid=false;
+    } else { el.style.borderColor=''; }
+    data[f.FieldID] = val;
+  });
+  return valid ? data : null;
+}
+
+function renderDynamicForm() {
+  const container = document.getElementById('dynamicFormContainer');
+  container.innerHTML = '';
+  const fields = allFields.filter(f=>f.Active!=='false').sort((a,b)=>(a.Order||0)-(b.Order||0));
+  if (!fields.length) { container.innerHTML = '<div class="empty-state"><div class="ei">📋</div><strong>No fields configured</strong><div>Add fields in Settings → Student Fields</div></div>'; return; }
+
+  // Group into rows of 2
+  for (let i=0;i<fields.length;i+=2) {
+    const row = document.createElement('div');
+    row.className = 'form-row';
+    [fields[i], fields[i+1]].filter(Boolean).forEach(f => {
+      const g = document.createElement('div');
+      g.className = 'form-group';
+      g.innerHTML = `<label class="form-label">${f.Label}${f.Required==='true'?'<span class="req">*</span>':''}</label>`;
+      let inp;
+      if (f.Type==='select') {
+        inp = document.createElement('select'); inp.className='form-select';
+        const opts = (f.Options||'').split(',').map(o=>o.trim()).filter(Boolean);
+        inp.innerHTML = `<option value="">Select ${f.Label}…</option>` + opts.map(o=>`<option>${o}</option>`).join('');
+      } else if (f.Type==='textarea') {
+        inp = document.createElement('textarea'); inp.className='form-textarea';
+      } else {
+        inp = document.createElement('input');
+        const typeMap = {number:'number',date:'date',email:'email',phone:'tel'};
+        inp.type = typeMap[f.Type]||'text';
+        inp.className = 'form-input';
+        inp.placeholder = `Enter ${f.Label}`;
+      }
+      inp.name = f.FieldID;
+      inp.required = f.Required==='true';
+      if (admFieldData[f.FieldID]) inp.value = admFieldData[f.FieldID];
+      g.appendChild(inp);
+      row.appendChild(g);
+    });
+    container.appendChild(row);
+  }
+}
+
+function renderHousePicker() {
+  const grid = document.getElementById('housePickerGrid');
+  if (!allHouses.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ei">🏠</div><strong>No houses configured</strong><div>Add houses in Settings first</div></div>'; return; }
+  grid.innerHTML = allHouses.map(h => `
+    <div class="house-card" id="hp-${h.HouseID}" onclick="selectHouse('${h.HouseID}')" style="cursor:pointer;border:2px solid transparent;text-align:center;padding-top:22px">
+      <div class="house-top" style="background:${h.Color}"></div>
+      <span class="house-icon">${h.Icon||'🏠'}</span>
+      <div class="house-name">${h.Name}</div>
+      ${h.Leader?`<div style="font-size:11px;color:var(--text3);margin-top:3px">👑 ${h.Leader}</div>`:''}
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">${allStudents.filter(s=>s.HouseID===h.HouseID).length} students</div>
+    </div>`).join('');
+}
+
+function selectHouse(id) {
+  admHouseId = id;
+  document.querySelectorAll('.house-card[id^="hp-"]').forEach(c => {
+    const hid = c.id.replace('hp-','');
+    const h = allHouses.find(x=>x.HouseID===hid);
+    c.style.borderColor = hid===id ? (h?h.Color:'var(--accent)') : 'transparent';
+    c.style.background = hid===id ? (h?h.Color+'22':'rgba(124,58,237,.15)') : 'var(--card)';
+  });
+}
+
+function renderAdmissionSummary() {
+  const house = allHouses.find(h=>h.HouseID===admHouseId);
+  const name  = getStudentName(admFieldData);
+  const div   = document.getElementById('admissionSummary');
+  div.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      ${admPhoto
+        ? `<img src="${admPhoto}" style="width:100px;height:130px;border-radius:10px;object-fit:cover;border:2px solid rgba(124,58,237,.4)" alt=""/>`
+        : `<div style="width:100px;height:130px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff">${getInitials(name)}</div>`}
+      ${house?`<span class="badge" style="background:${house.Color}22;color:${house.Color};border:1px solid ${house.Color}44">${house.Icon||'🏠'} ${house.Name}</span>`:'<span class="badge badge-inactive">No House</span>'}
+    </div>
+    <div class="profile-grid">
+      ${Object.entries(admFieldData).filter(([k,v])=>v).map(([k,v]) => {
+        const f = allFields.find(x=>x.FieldID===k);
+        return f?`<div class="profile-field"><div class="profile-field-label">${f.Label}</div><div class="profile-field-value">${v}</div></div>`:'';
+      }).join('')}
+    </div>`;
+}
+
+async function submitAdmission() {
+  if (!gasConnected) { toast('❌','Not connected to GAS','err'); return; }
+  const btn = document.getElementById('submitAdmBtn');
+  btn.disabled = true; btn.textContent = '⏳ Saving…';
+
+  showLoading('Creating student record…');
+  const r = await apiPost({action:'createStudent',houseId:admHouseId||'',fieldData:admFieldData});
+  if (!r.ok) { hideLoading(); toast('❌',r.error||'Error creating student','err'); btn.disabled=false; btn.textContent='🎓 Confirm Admission'; return; }
+
+  admNewStudentId = r.studentId;
+
+  // Upload photo if captured
+  if (admPhoto) {
+    document.getElementById('loadingText').textContent = 'Uploading photo to Drive…';
+    const base64clean = admPhoto.split(',')[1] || admPhoto;
+    const pr = await apiPost({action:'uploadPhoto',studentId:admNewStudentId,base64:admPhoto,mimeType:admPhotoMime});
+    if (!pr.ok) toast('⚠️','Photo upload failed, student saved without photo','warn');
+  }
+
+  hideLoading();
+  toast('🎓',`${getStudentName(admFieldData)||'Student'} admitted successfully!`,'ok');
+  btn.disabled=false; btn.textContent='🎓 Confirm Admission';
+  loadStudents();
+  // Show success + offer to print ID card
+  const summary = document.getElementById('admissionSummary');
+  summary.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px">
+    <div style="font-size:48px;margin-bottom:12px">🎉</div>
+    <div style="font-size:20px;font-weight:800;color:var(--green);margin-bottom:6px">Admission Successful!</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px">Student ID: <code>${admNewStudentId}</code></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="showIDCard('${admNewStudentId}')">🪪 Print ID Card</button>
+      <button class="btn btn-outline" onclick="initAdmission()">➕ New Admission</button>
+      <button class="btn btn-outline" onclick="switchView('students')">👥 View Students</button>
+    </div>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════════════
+//  PHOTO CAPTURE
+// ════════════════════════════════════════════════════════════
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:400,height:500}});
+    admCameraStream = stream;
+    const video = document.getElementById('photoVideo');
+    video.srcObject = stream;
+    video.style.display = 'block';
+    video.play();
+    document.getElementById('photoPlaceholder').style.display = 'none';
+    document.getElementById('photoCaptured').style.display = 'none';
+    document.getElementById('photoCanvas').style.display = 'none';
+    document.getElementById('cameraBtn').style.display = 'none';
+    document.getElementById('captureBtn').style.display = 'inline-flex';
+    document.getElementById('retakeBtn').style.display = 'none';
+  } catch(e) { toast('❌','Camera access denied: '+e.message,'err'); }
+}
+
+function capturePhoto() {
+  const video  = document.getElementById('photoVideo');
+  const canvas = document.createElement('canvas');
+  canvas.width  = 400; canvas.height = 500;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, 400, 500);
+  admPhoto     = canvas.toDataURL('image/jpeg', 0.8);
+  admPhotoMime = 'image/jpeg';
+  stopCamera();
+  const img = document.getElementById('photoCaptured');
+  img.src = admPhoto; img.style.display = 'block';
+  document.getElementById('photoVideo').style.display = 'none';
+  document.getElementById('photoThumb').style.display = 'block';
+  document.getElementById('photoThumbImg').src = admPhoto;
+  document.getElementById('captureBtn').style.display = 'none';
+  document.getElementById('retakeBtn').style.display = 'inline-flex';
+  document.getElementById('cameraBtn').style.display = 'none';
+}
+
+function retakePhoto() {
+  admPhoto = null;
+  document.getElementById('photoCaptured').style.display = 'none';
+  document.getElementById('photoThumb').style.display = 'none';
+  document.getElementById('retakeBtn').style.display = 'none';
+  document.getElementById('cameraBtn').style.display = 'inline-flex';
+  document.getElementById('photoPlaceholder').style.display = 'flex';
+}
+
+function stopCamera() {
+  if (admCameraStream) {
+    admCameraStream.getTracks().forEach(t => t.stop());
+    admCameraStream = null;
+  }
+}
+
+function uploadPhotoFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    admPhoto     = e.target.result;
+    admPhotoMime = file.type || 'image/jpeg';
+    const img = document.getElementById('photoCaptured');
+    img.src = admPhoto; img.style.display = 'block';
+    document.getElementById('photoVideo').style.display = 'none';
+    document.getElementById('photoPlaceholder').style.display = 'none';
+    document.getElementById('photoThumb').style.display = 'block';
+    document.getElementById('photoThumbImg').src = admPhoto;
+    document.getElementById('cameraBtn').style.display = 'none';
+    document.getElementById('retakeBtn').style.display = 'inline-flex';
+    stopCamera();
+  };
+  reader.readAsDataURL(file);
+}
+
+// ════════════════════════════════════════════════════════════
+//  ID CARDS
+// ════════════════════════════════════════════════════════════
+function loadIDCards() {
+  renderIDCards(allStudents);
+}
+
+function renderIDCards(list) {
+  const grid = document.getElementById('idCardsGrid');
+  if (!list.length) { grid.innerHTML = emptyState('🪪','No students found'); return; }
+  grid.innerHTML = list.map(s => {
+    const name  = getStudentName(s.fieldData);
+    const house = allHouses.find(h=>h.HouseID===s.HouseID);
+    const init  = getInitials(name);
+    const checked = selectedCards.has(s.StudentID);
+    return `<div class="student-card" onclick="toggleCardSelect('${s.StudentID}')" id="cardItem-${s.StudentID}" style="${checked?'border-color:var(--accent);background:rgba(124,58,237,.1)':''}">
+      ${house?`<div class="house-stripe" style="background:${house.Color}"></div>`:''}
+      <div style="position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:5px;border:2px solid ${checked?'var(--accent)':'var(--card-b)'};background:${checked?'var(--accent)':'transparent'};display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff">${checked?'✓':''}</div>
+      ${s.photoUrl?`<img src="${s.photoUrl}" class="student-photo" alt="${name}"/>`:`<div class="student-avatar">${init}</div>`}
+      <div class="student-name">${name||'Unknown'}</div>
+      <div class="student-id">${s.StudentID}</div>
+      ${house?`<span class="badge" style="background:${house.Color}22;color:${house.Color};border:1px solid ${house.Color}44">${house.Icon||'🏠'} ${house.Name}</span>`:''}
+      <div class="student-actions">
+        <button class="btn btn-primary btn-xs btn-full" onclick="event.stopPropagation();showIDCard('${s.StudentID}')">👁️ Preview</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterCards() {
+  const q     = (document.getElementById('cardSearch').value||'').toLowerCase();
+  const house = document.getElementById('cardHouseFilter').value;
+  let list = allStudents;
+  if (q)     list = list.filter(s => s.StudentID.toLowerCase().includes(q)||JSON.stringify(s.fieldData||{}).toLowerCase().includes(q));
+  if (house) list = list.filter(s => s.HouseID===house);
+  renderIDCards(list);
+}
+
+function toggleCardSelect(id) {
+  if (selectedCards.has(id)) selectedCards.delete(id);
+  else selectedCards.add(id);
+  filterCards();
+}
+function selectAllCards() { allStudents.forEach(s=>selectedCards.add(s.StudentID)); filterCards(); }
+function clearCardSelection() { selectedCards.clear(); filterCards(); }
+
+async function showIDCard(studentId) {
+  const r = await api({action:'getStudent',id:studentId});
+  if (!r.student) { toast('❌','Student not found','err'); return; }
+  currentCardStudent = r.student;
+  document.getElementById('idCardPreviewArea').innerHTML = '';
+  document.getElementById('idCardPreviewArea').appendChild(buildIDCardElement(r.student));
+  openModal('idCardModal');
+}
+
+function buildIDCardElement(s) {
+  const house    = allHouses.find(h=>h.HouseID===s.HouseID);
+  const name     = getStudentName(s.fieldData);
+  const hColor   = house?house.Color:'#7c3aed';
+  const logoUrl  = appSettings.logoUrl  || '';
+  const foundUrl = appSettings.founderUrl || '';
+  const founderName  = appSettings.founderName  || '';
+  const founderTitle = appSettings.founderTitle || 'Director';
+  const centerName   = appSettings.centerName  || 'Don Bosco Youth Center';
+
+  // Show select fields on card
+  const cardFields = allFields.filter(f=>f.Active!=='false').slice(0,4);
+
+  const div = document.createElement('div');
+  div.className = 'id-card-preview';
+  div.id = 'idCardEl-'+s.StudentID;
+
+  div.innerHTML = `
+    <div class="house-color-bar" style="background:${hColor}"></div>
+    <div class="id-card-header" style="background:linear-gradient(135deg,${hColor},${hColor}cc)">
+      ${logoUrl?`<img src="${logoUrl}" class="id-card-logo" alt="Logo"/>`:`<div style="width:48px;height:48px;border-radius:8px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:24px">⭐</div>`}
+      <div class="id-card-center-name">${centerName}</div>
+      <div style="font-size:9px;color:rgba(255,255,255,.7);font-weight:600">STUDENT IDENTITY CARD</div>
+    </div>
+    <div class="id-card-body">
+      ${s.photoUrlLarge
+        ? `<img src="${s.photoUrlLarge}" class="id-card-photo" alt="${name}"/>`
+        : `<div style="width:80px;height:100px;border-radius:8px;background:linear-gradient(135deg,${hColor},${hColor}88);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;border:2px solid #eee;flex-shrink:0">${getInitials(name)}</div>`}
+      <div class="id-card-info">
+        <div class="id-card-name">${name||'—'}</div>
+        <div class="id-card-sid">${s.StudentID}</div>
+        ${house?`<div style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;color:${hColor};border:1px solid ${hColor};margin-bottom:6px">${house.Icon||'🏠'} ${house.Name}</div>`:'' }
+        ${cardFields.map(f => {
+          const val = (s.fieldData||{})[f.FieldID]||'—';
+          return `<div class="id-card-field"><strong>${f.Label}:</strong> ${val}</div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="id-card-qr-section">
+      <div>
+        <div style="font-size:8px;font-weight:700;color:#555;margin-bottom:3px">SCAN TO VERIFY</div>
+        <div class="id-card-qr" id="qrEl-${s.StudentID}"></div>
+      </div>
+      <div style="text-align:right;font-size:8px;color:#666;line-height:1.5">
+        <div style="font-weight:700">${centerName}</div>
+        ${appSettings.centerAddress?`<div>${appSettings.centerAddress}</div>`:''}
+        ${appSettings.centerPhone?`<div>${appSettings.centerPhone}</div>`:''}
+      </div>
+    </div>
+    <div class="id-card-footer" style="background:${hColor}">
+      ${foundUrl?`<img src="${foundUrl}" class="id-card-founder-photo" alt="Founder"/>`:`<div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:14px">👤</div>`}
+      <div>
+        <div class="id-card-founder-name">${founderName||'Director'}</div>
+        <div class="id-card-founder-title">${founderTitle}</div>
+      </div>
+      <div style="margin-left:auto;font-size:8px;color:rgba(255,255,255,.6)">Valid: ${new Date().getFullYear()}-${new Date().getFullYear()+1}</div>
+    </div>`;
+
+  // Generate QR
+  requestAnimationFrame(() => {
+    const qrEl = div.querySelector(`#qrEl-${s.StudentID}`);
+    if (qrEl && window.QRCode) {
+      try {
+        new QRCode(qrEl, { text:`${s.StudentID}|${name}|${house?house.Name:''}|${new Date().getFullYear()}`, width:70, height:70, colorDark:'#000', colorLight:'#fff', correctLevel: QRCode.CorrectLevel.H });
+      } catch(e) {}
+    }
+  });
+
+  return div;
+}
+
+function printSingleCard() {
+  if (!currentCardStudent) return;
+  const area = document.getElementById('print-area');
+  area.innerHTML = '';
+  const pg = document.createElement('div'); pg.className='print-page';
+  pg.appendChild(buildIDCardElement(currentCardStudent));
+  area.appendChild(pg);
+  setTimeout(() => window.print(), 400);
+}
+
+function printSelectedCards() {
+  const ids = selectedCards.size ? [...selectedCards] : allStudents.map(s=>s.StudentID);
+  if (!ids.length) { toast('⚠️','No students to print','warn'); return; }
+  showLoading('Preparing cards…');
+  const area = document.getElementById('print-area'); area.innerHTML='';
+  const selected = allStudents.filter(s=>ids.includes(s.StudentID));
+  // 2 cards per page
+  for (let i=0;i<selected.length;i+=2) {
+    const pg = document.createElement('div'); pg.className='print-page';
+    pg.style.cssText='display:flex;gap:16px;flex-wrap:wrap;justify-content:center;padding:20px;';
+    [selected[i],selected[i+1]].filter(Boolean).forEach(s=>pg.appendChild(buildIDCardElement(s)));
+    area.appendChild(pg);
+  }
+  hideLoading();
+  setTimeout(()=>window.print(), 600);
+}
+
+// ════════════════════════════════════════════════════════════
+//  HOUSES
+// ════════════════════════════════════════════════════════════
+async function loadHousesView() {
+  if (!gasConnected) { showOfflineMsg('housesGrid'); return; }
+  const r = await api({action:'getHouses'});
+  if (r.houses) { allHouses=r.houses; populateHouseFilters(); }
+  renderHousesGrid();
+}
+
+function renderHousesGrid() {
+  const grid = document.getElementById('housesGrid');
+  if (!allHouses.length) { grid.innerHTML = emptyState('🏠','No houses yet','Add a house using the button above'); return; }
+  grid.innerHTML = allHouses.map(h => {
+    const count = allStudents.filter(s=>s.HouseID===h.HouseID).length;
+    return `<div class="house-card" style="padding-top:22px">
+      <div class="house-top" style="background:${h.Color}"></div>
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <div>
+          <span class="house-icon">${h.Icon||'🏠'}</span>
+          <div class="house-name">${h.Name}</div>
+          ${h.Leader?`<div style="font-size:11px;color:var(--text3);margin-top:2px">👑 ${h.Leader}</div>`:''}
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-xs" onclick="openEditHouseModal('${h.HouseID}')">✏️</button>
+          <button class="btn btn-ghost btn-xs" onclick="deleteHouse('${h.HouseID}')">🗑️</button>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="house-count">${count}</div>
+        <div class="house-label">Students</div>
+      </div>
+      <div class="report-bar" style="margin-top:8px">
+        <div class="report-bar-fill" style="width:${Math.min(count*5,100)}%;background:${h.Color}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+const PRESET_COLORS = ['#ef4444','#f97316','#f59e0b','#22c55e','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#6366f1'];
+
+function openAddHouseModal() {
+  document.getElementById('hmEditId').value = '';
+  document.getElementById('hmName').value   = '';
+  document.getElementById('hmIcon').value   = '🏠';
+  document.getElementById('hmLeader').value = '';
+  document.getElementById('hmColor').value  = '#7c3aed';
+  document.getElementById('houseModalTitle').innerHTML = '🏠 Add House <span class="modal-close" onclick="closeModal(\'houseModal\')">✕</span>';
+  renderColorSwatches('#7c3aed');
+  openModal('houseModal');
+}
+
+function openEditHouseModal(id) {
+  const h = allHouses.find(x=>x.HouseID===id);
+  if (!h) return;
+  document.getElementById('hmEditId').value = id;
+  document.getElementById('hmName').value   = h.Name;
+  document.getElementById('hmIcon').value   = h.Icon||'🏠';
+  document.getElementById('hmLeader').value = h.Leader||'';
+  document.getElementById('hmColor').value  = h.Color||'#7c3aed';
+  document.getElementById('houseModalTitle').innerHTML = '✏️ Edit House <span class="modal-close" onclick="closeModal(\'houseModal\')">✕</span>';
+  renderColorSwatches(h.Color||'#7c3aed');
+  openModal('houseModal');
+}
+
+function renderColorSwatches(selected) {
+  document.getElementById('colorSwatches').innerHTML = PRESET_COLORS.map(c =>
+    `<div class="color-swatch ${c===selected?'active':''}" style="background:${c}" onclick="pickColor('${c}')" title="${c}"></div>`
+  ).join('');
+}
+
+function pickColor(c) {
+  document.getElementById('hmColor').value = c;
+  renderColorSwatches(c);
+}
+
+async function saveHouse() {
+  const name   = document.getElementById('hmName').value.trim();
+  const icon   = document.getElementById('hmIcon').value.trim()||'🏠';
+  const color  = document.getElementById('hmColor').value;
+  const leader = document.getElementById('hmLeader').value.trim();
+  const editId = document.getElementById('hmEditId').value;
+  if (!name) { toast('⚠️','House name required','warn'); return; }
+  showLoading('Saving house…');
+  const action = editId ? 'updateHouse' : 'createHouse';
+  const r = await apiPost({action, id:editId||undefined, name, icon, color, leader});
+  hideLoading();
+  if (r.ok) {
+    toast('✅','House saved','ok');
+    closeModal('houseModal');
+    const hr = await api({action:'getHouses'});
+    if (hr.houses) { allHouses=hr.houses; populateHouseFilters(); }
+    renderHousesGrid();
+    renderSettingsHouses();
+  } else toast('❌',r.error||'Error','err');
+}
+
+async function deleteHouse(id) {
+  if (!confirm('Delete this house? Students in this house will lose their house assignment.')) return;
+  showLoading('Deleting…');
+  const r = await apiPost({action:'deleteHouse',id});
+  hideLoading();
+  if (r.ok) {
+    toast('🗑️','House deleted','ok');
+    const hr = await api({action:'getHouses'});
+    if (hr.houses) { allHouses=hr.houses; populateHouseFilters(); }
+    renderHousesGrid();
+    renderSettingsHouses();
+  } else toast('❌',r.error||'Error','err');
+}
+
+// ════════════════════════════════════════════════════════════
+//  ATTENDANCE
+// ════════════════════════════════════════════════════════════
+function setAttTab(tab) {
+  document.getElementById('attTabScanner').style.display  = tab==='scanner' ? 'block':'none';
+  document.getElementById('attTabSessions').style.display = tab==='sessions'? 'block':'none';
+  document.querySelectorAll('#attTabs .view-tab').forEach((t,i)=>t.classList.toggle('active',(tab==='scanner'&&i===0)||(tab==='sessions'&&i===1)));
+  if (tab==='sessions') loadSessionsTab();
+}
+
+async function startAttSession() {
+  const title   = document.getElementById('sessionTitle').value.trim();
+  const teacher = document.getElementById('sessionTeacher').value.trim();
+  const date    = document.getElementById('sessionDate').value;
+  const period  = document.getElementById('sessionPeriod').value.trim();
+  if (!title) { toast('⚠️','Enter a subject/event name','warn'); return; }
+
+  showLoading('Starting session…');
+  const r = await apiPost({action:'createSession',title,teacher,date,period});
+  hideLoading();
+  if (!r.ok) { toast('❌',r.error||'Error','err'); return; }
+
+  attSession = { id:r.sessionId, title, teacher, date, period };
+  attList    = [];
+  attDups    = 0;
+
+  document.getElementById('attNoSession').style.display    = 'none';
+  document.getElementById('attActiveSession').style.display= 'block';
+  document.getElementById('attSessionName').textContent    = title;
+  document.getElementById('attSessionMeta').textContent    = `${teacher?teacher+' • ':''}${date}${period?' • '+period:''}`;
+  document.getElementById('attCountBadge').textContent     = '0 scanned';
+  document.getElementById('attEmpty').style.display        = 'block';
+  document.getElementById('attLiveList').innerHTML         = document.getElementById('attEmpty').outerHTML;
+
+  initQRScanner();
+}
+
+function initQRScanner() {
+  if (qrScanner) { qrScanner.clear().catch(()=>{}); qrScanner=null; }
+  qrScanner = new Html5Qrcode('qr-reader');
+  const cfg = { fps:15, qrbox:{width:180,height:180}, aspectRatio:1.0 };
+  qrScanner.start({facingMode:'environment'}, cfg, onAttScan, ()=>{}).catch(()=>{
+    qrScanner.start({facingMode:'user'}, cfg, onAttScan, ()=>{}).catch(()=>toast('❌','Camera unavailable','err'));
+  });
+}
+
+async function onAttScan(text) {
+  if (scanCooldown) return;
+  const parts = text.split('|');
+  const sid   = (parts[0]||'').trim();
+  const name  = (parts[1]||'').trim();
+  const house = (parts[2]||'').trim();
+
+  if (!sid) { showLastScanResult(null,null,null,'err','❌ Invalid QR'); return; }
+
+  const dup = attList.find(a=>a.studentId===sid);
+  if (dup) {
+    attDups++;
+    showLastScanResult(name,sid,house,'dup',`⚠️ Already marked at ${fmt(dup.time)}`);
+    playScanSound('dup'); triggerScanCooldown(2000); return;
+  }
+
+  // Look up student in GAS for validation
+  const student = allStudents.find(s=>s.StudentID===sid);
+  const sName   = student ? getStudentName(student.fieldData) : name;
+  const houseObj= allHouses.find(h=>student&&h.HouseID===student.HouseID);
+
+  const rec = {studentId:sid,studentName:sName,house:houseObj?houseObj.Name:house,time:Date.now()};
+  attList.unshift(rec);
+
+  // Mark in GAS
+  if (gasConnected) {
+    apiPost({action:'markAttendance',sessionId:attSession.id,studentId:sid,studentName:sName,house:houseObj?houseObj.Name:house});
+  }
+
+  document.getElementById('attCountBadge').textContent = attList.length+' scanned';
+  showLastScanResult(sName,sid,houseObj?houseObj.Name:house,'ok','✅ Attendance Marked!');
+  addAttItem(rec,houseObj);
+  playScanSound('ok');
+  toast('✅',sName||sid,'ok');
+  triggerScanCooldown(1500);
+}
+
+function showLastScanResult(name,id,house,type,status) {
+  const el = document.getElementById('lastScan');
+  el.className = `last-scan show ${type}`;
+  document.getElementById('lsName').textContent   = name||'Unknown';
+  document.getElementById('lsMeta').textContent   = id||'—';
+  const hBadge = document.getElementById('lsHouse');
+  hBadge.textContent  = house||'—';
+  const h = allHouses.find(x=>x.Name===house);
+  hBadge.style.cssText = h?`background:${h.Color}22;color:${h.Color};border:1px solid ${h.Color}44`:'';
+  const st = document.getElementById('lsStatus');
+  st.textContent = status;
+  st.style.color = type==='ok'?'var(--green)':type==='dup'?'var(--yellow)':'var(--red)';
+}
+
+function addAttItem(rec, houseObj) {
+  const list = document.getElementById('attLiveList');
+  document.getElementById('attEmpty')?.remove();
+  const d = document.createElement('div');
+  d.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--card-b);animation:slideIn .3s ease';
+  const hColor = houseObj?houseObj.Color:'var(--accent)';
+  d.innerHTML = `
+    <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,${hColor},${hColor}88);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">${getInitials(rec.studentName)}</div>
+    <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">${rec.studentName||rec.studentId}</div><div style="font-size:10px;color:var(--text3)">${rec.house||'—'}</div></div>
+    <div style="font-size:10px;color:var(--text3)">${fmt(rec.time)}</div>`;
+  list.insertBefore(d, list.firstChild);
+}
+
+async function endAttSession() {
+  if (!confirm('End this attendance session?')) return;
+  if (qrScanner) { qrScanner.stop().catch(()=>{}); qrScanner=null; }
+  if (gasConnected && attSession) await apiPost({action:'endSession',id:attSession.id});
+  toast('🏁',`Session ended — ${attList.length} students marked`,'ok');
+  attSession=null;
+  document.getElementById('attNoSession').style.display    = 'block';
+  document.getElementById('attActiveSession').style.display= 'none';
+  document.getElementById('attLiveList').innerHTML = '';
+}
+
+async function loadSessionsTab() {
+  if (!gasConnected) return;
+  const r = await api({action:'getSessions'});
+  if (!r.sessions) return;
+  allSessions = r.sessions;
+  const tbody = document.getElementById('sessionsBody');
+  if (!allSessions.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">No sessions yet</td></tr>'; return; }
+  tbody.innerHTML = allSessions.map(s=>`
+    <tr>
+      <td style="color:var(--text3)">${s.Date||'—'}</td>
+      <td><strong>${s.Title||'—'}</strong></td>
+      <td>${s.Teacher||'—'}</td>
+      <td><span style="font-weight:700;color:var(--accent2)">${s.Count||0}</span></td>
+      <td><span class="badge ${s.Status==='active'?'badge-active':'badge-inactive'}">${s.Status||'—'}</span></td>
+      <td><button class="btn btn-outline btn-xs" onclick="viewSessionReport('${s.SessionID}')">📋 Report</button></td>
+    </tr>`).join('');
+}
+
+async function viewSessionReport(id) {
+  const r = await api({action:'getAttendance',sessionId:id});
+  const list = r.attendance||[];
+  const sess = allSessions.find(s=>s.SessionID===id);
+  alert(`Session: ${sess?sess.Title:'—'}\nDate: ${sess?sess.Date:'—'}\nTotal Present: ${list.length}\n\n${list.map(a=>`${a.StudentID} — ${a.StudentName} — ${a.House}`).join('\n')}`);
+}
+
+// ════════════════════════════════════════════════════════════
+//  REPORTS
+// ════════════════════════════════════════════════════════════
+async function loadReports() {
+  if (!gasConnected) return;
+  const r = await api({action:'getStats'});
+  document.getElementById('rp-total').textContent   = r.totalStudents||0;
+  document.getElementById('rp-sessions').textContent= r.totalSessions||0;
+
+  if (r.houseDist) {
+    const max = Math.max(...r.houseDist.map(h=>h.count),1);
+    document.getElementById('rp-houseBars').innerHTML = r.houseDist.map(h=>`
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+          <span style="font-weight:600;color:var(--text)">${h.name}</span>
+          <span style="color:var(--text2)">${h.count}</span>
+        </div>
+        <div class="report-bar"><div class="report-bar-fill" style="width:${Math.round(h.count/max*100)}%;background:${h.color}"></div></div>
+      </div>`).join('');
+  }
+
+  const sr = await api({action:'getSessions'});
+  if (sr.sessions) {
+    allSessions = sr.sessions;
+    document.getElementById('rp-att').textContent = sr.sessions.reduce((a,s)=>a+Number(s.Count||0),0);
+    document.getElementById('rp-recentSessions').innerHTML = sr.sessions.slice(0,5).map(s=>`
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--card-b);font-size:13px">
+        <div><strong>${s.Title||'—'}</strong><div style="font-size:10px;color:var(--text3)">${s.Date}</div></div>
+        <span style="color:var(--accent2);font-weight:700">${s.Count||0} present</span>
+      </div>`).join('')||'<div style="color:var(--text3);text-align:center;padding:16px">No sessions yet</div>';
+  }
+}
+
+function setReportTab(tab) { /* simplified — just show overview for now */ }
+
+// ════════════════════════════════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════════════════════════════════
+function setSettingsTab(tab) {
+  document.querySelectorAll('.settings-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));
+  const panels = {general:'sp-general',images:'sp-images',fields:'sp-fields',houses:'sp-houses',connection:'sp-connection'};
+  event.target.classList.add('active');
+  document.getElementById(panels[tab])?.classList.add('active');
+  if (tab==='fields')  loadFieldsBuilder();
+  if (tab==='houses')  renderSettingsHouses();
+  if (tab==='connection') { document.getElementById('gasUrlInput').value=GAS_URL; }
+}
+
+function loadSettingsView() {
+  // Populate general settings
+  document.getElementById('set-centerName').value   = appSettings.centerName   ||'';
+  document.getElementById('set-idPrefix').value     = appSettings.studentIdPrefix||'DB';
+  document.getElementById('set-address').value      = appSettings.centerAddress  ||'';
+  document.getElementById('set-phone').value        = appSettings.centerPhone    ||'';
+  document.getElementById('set-email').value        = appSettings.centerEmail    ||'';
+  document.getElementById('set-founderName').value  = appSettings.founderName    ||'';
+  document.getElementById('set-founderTitle').value = appSettings.founderTitle   ||'';
+
+  // Images
+  if (appSettings.logoUrl)    { document.getElementById('logoPreview').src=appSettings.logoUrl; document.getElementById('logoPreview').style.display='block'; document.getElementById('logoPlaceholder').style.display='none'; }
+  if (appSettings.founderUrl) { document.getElementById('founderPreview').src=appSettings.founderUrl; document.getElementById('founderPreview').style.display='block'; document.getElementById('founderPlaceholder').style.display='none'; }
+  document.getElementById('gasUrlInput').value = GAS_URL;
+}
+
+async function saveGeneralSettings() {
+  const data = {
+    centerName:      document.getElementById('set-centerName').value.trim(),
+    studentIdPrefix: document.getElementById('set-idPrefix').value.trim().toUpperCase(),
+    centerAddress:   document.getElementById('set-address').value.trim(),
+    centerPhone:     document.getElementById('set-phone').value.trim(),
+    centerEmail:     document.getElementById('set-email').value.trim(),
+    founderName:     document.getElementById('set-founderName').value.trim(),
+    founderTitle:    document.getElementById('set-founderTitle').value.trim(),
+  };
+  showLoading('Saving…');
+  const r = await apiPost({action:'updateSettings',data});
+  hideLoading();
+  if (r.ok) {
+    Object.assign(appSettings, data);
+    applyCenterBranding();
+    toast('✅','Settings saved','ok');
+  } else toast('❌',r.error||'Error','err');
+}
+
+function triggerUpload(type) { document.getElementById(type+'FileInput').click(); }
+
+async function handleAssetUpload(type, input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const base64 = e.target.result;
+    const preview = document.getElementById(type+'Preview');
+    const placeholder = document.getElementById(type+'Placeholder');
+    preview.src = base64; preview.style.display='block';
+    if (placeholder) placeholder.style.display='none';
+
+    if (!gasConnected) { toast('⚠️','Not connected — image shown locally only','warn'); return; }
+    showLoading(`Uploading ${type} to Drive…`);
+    const r = await apiPost({action:'uploadAsset',type,base64,mimeType:file.type});
+    hideLoading();
+    if (r.ok) {
+      appSettings[type+'Url'] = r.url;
+      appSettings[type+'FileId'] = r.fileId;
+      applyCenterBranding();
+      toast('✅',`${type} uploaded to Drive!`,'ok');
+    } else toast('❌',r.error||'Upload failed','err');
+  };
+  reader.readAsDataURL(file);
+}
+
+// Fields builder
+function loadFieldsBuilder() {
+  renderFieldsBuilder();
+}
+
+function renderFieldsBuilder() {
+  const container = document.getElementById('fieldsBuilder');
+  const fields = allFields.filter(f=>f.Active!=='false').sort((a,b)=>(a.Order||0)-(b.Order||0));
+  container.innerHTML = fields.map((f,i) => `
+    <div class="field-item" draggable="true" data-fid="${f.FieldID}"
+      ondragstart="dragStart(event,'${f.FieldID}')" ondragover="dragOver(event)" ondrop="dropField(event,'${f.FieldID}')">
+      <div class="field-drag">⠿</div>
+      <div class="field-info">
+        <div class="field-label">${f.Label} ${f.Required==='true'?'<span style="color:var(--red)">*</span>':''}</div>
+        <div class="field-meta">${f.Type}${f.Options?` — ${f.Options}`:''}</div>
+      </div>
+      <div class="field-actions">
+        <button class="btn btn-ghost btn-xs" onclick="openEditFieldModal('${f.FieldID}')">✏️</button>
+        <button class="btn btn-ghost btn-xs" onclick="deleteField('${f.FieldID}')">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+let dragSrc = null;
+function dragStart(e,id) { dragSrc=id; e.dataTransfer.effectAllowed='move'; }
+function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect='move'; }
+async function dropField(e,targetId) {
+  e.preventDefault();
+  if (!dragSrc||dragSrc===targetId) return;
+  const order = allFields.filter(f=>f.Active!=='false').sort((a,b)=>(a.Order||0)-(b.Order||0)).map(f=>f.FieldID);
+  const si=order.indexOf(dragSrc), ti=order.indexOf(targetId);
+  if (si>-1&&ti>-1) { order.splice(si,1); order.splice(ti,0,dragSrc); }
+  await apiPost({action:'reorderFields',order});
+  const fr=await api({action:'getFields'}); if(fr.fields) allFields=fr.fields;
+  renderFieldsBuilder();
+}
+
+function openAddFieldModal() {
+  document.getElementById('fmEditId').value='';
+  document.getElementById('fmLabel').value='';
+  document.getElementById('fmType').value='text';
+  document.getElementById('fmOptions').value='';
+  document.getElementById('fmRequired').checked=false;
+  document.getElementById('fmOptionsGroup').style.display='none';
+  document.getElementById('fieldModalTitle').innerHTML='📋 Add Field <span class="modal-close" onclick="closeModal(\'fieldModal\')">✕</span>';
+  openModal('fieldModal');
+}
+
+function openEditFieldModal(id) {
+  const f = allFields.find(x=>x.FieldID===id); if(!f) return;
+  document.getElementById('fmEditId').value  = id;
+  document.getElementById('fmLabel').value   = f.Label;
+  document.getElementById('fmType').value    = f.Type||'text';
+  document.getElementById('fmOptions').value = f.Options||'';
+  document.getElementById('fmRequired').checked = f.Required==='true';
+  toggleFieldOptions();
+  document.getElementById('fieldModalTitle').innerHTML='✏️ Edit Field <span class="modal-close" onclick="closeModal(\'fieldModal\')">✕</span>';
+  openModal('fieldModal');
+}
+
+function toggleFieldOptions() {
+  const t = document.getElementById('fmType').value;
+  document.getElementById('fmOptionsGroup').style.display = t==='select'?'block':'none';
+}
+
+async function saveField() {
+  const label    = document.getElementById('fmLabel').value.trim();
+  const type     = document.getElementById('fmType').value;
+  const options  = document.getElementById('fmOptions').value.trim();
+  const required = document.getElementById('fmRequired').checked;
+  const editId   = document.getElementById('fmEditId').value;
+  if (!label) { toast('⚠️','Field label required','warn'); return; }
+  showLoading('Saving field…');
+  const action = editId ? 'updateField' : 'createField';
+  const r = await apiPost({action,id:editId||undefined,label,type,options,required});
+  hideLoading();
+  if (r.ok) {
+    toast('✅','Field saved','ok');
+    closeModal('fieldModal');
+    const fr=await api({action:'getFields'}); if(fr.fields) allFields=fr.fields;
+    renderFieldsBuilder();
+    renderDynamicForm();
+  } else toast('❌',r.error||'Error','err');
+}
+
+async function deleteField(id) {
+  if (!confirm('Delete this field?')) return;
+  showLoading('Deleting…');
+  const r = await apiPost({action:'deleteField',id});
+  hideLoading();
+  if (r.ok) {
+    toast('🗑️','Field deleted','ok');
+    const fr=await api({action:'getFields'}); if(fr.fields) allFields=fr.fields;
+    renderFieldsBuilder();
+  } else toast('❌',r.error||'Error','err');
+}
+
+function renderSettingsHouses() {
+  const container = document.getElementById('settingsHousesList');
+  if (!allHouses.length) { container.innerHTML='<div style="color:var(--text3);text-align:center;padding:16px">No houses yet</div>'; return; }
+  container.innerHTML = allHouses.map(h=>`
+    <div class="field-item">
+      <div style="width:16px;height:16px;border-radius:50%;background:${h.Color};flex-shrink:0"></div>
+      <div class="field-info">
+        <div class="field-label">${h.Icon||'🏠'} ${h.Name}</div>
+        <div class="field-meta">${h.Leader?'Leader: '+h.Leader:'No leader set'} &nbsp;·&nbsp; Color: ${h.Color}</div>
+      </div>
+      <div class="field-actions">
+        <button class="btn btn-ghost btn-xs" onclick="openEditHouseModal('${h.HouseID}')">✏️</button>
+        <button class="btn btn-ghost btn-xs" onclick="deleteHouse('${h.HouseID}')">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+//  UTILITIES
+// ════════════════════════════════════════════════════════════
+function getStudentName(fieldData) {
+  if (!fieldData) return '';
+  // Find name field — look for field labeled "name" or "full name"
+  const nameField = allFields.find(f => f.Label && f.Label.toLowerCase().includes('name'));
+  if (nameField && fieldData[nameField.FieldID]) return fieldData[nameField.FieldID];
+  // Fallback: first value
+  return Object.values(fieldData)[0] || '';
+}
+
+function getInitials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+}
+
+function fmt(d) { return new Date(d).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+
+function emptyState(icon, title, sub='') {
+  return `<div class="empty-state"><div class="ei">${icon}</div><strong>${title}</strong>${sub?`<div>${sub}</div>`:''}</div>`;
+}
+
+function showOfflineMsg(containerId) {
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="ei">📡</div><strong>Not connected</strong><div>Configure Google Sheets in Settings</div><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="openModal('settingsModal')">⚙️ Configure</button></div>`;
+}
+
+function playScanSound(type) {
+  try {
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator(),g=ctx.createGain();
+    osc.connect(g);g.connect(ctx.destination);
+    osc.frequency.value=type==='ok'?880:440;osc.type='sine';
+    g.gain.setValueAtTime(.3,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.15);
+    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+.15);
+  } catch(e){}
+}
+
+function triggerScanCooldown(ms) { scanCooldown=true; setTimeout(()=>scanCooldown=false,ms); }
+
+// Online/Offline
+function updateOnlineStatus() {
+  const pill = document.getElementById('onlinePill');
+  const el   = document.getElementById('onlineText');
+  if (navigator.onLine) { pill.className='online-pill on'; el.textContent='Online'; if(GAS_URL) checkConnection(); }
+  else { pill.className='online-pill off'; el.textContent='Offline'; gasConnected=false; document.getElementById('gasDot').className='gas-dot no'; }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+
+// ════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  // Date
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('sessionDate').value = new Date().toISOString().split('T')[0];
+
+  // Load GAS URL from input
+  document.getElementById('qsGasUrl').value = GAS_URL;
+
+  updateOnlineStatus();
+
+  if (!GAS_URL) {
+    // Show setup prompt
+    setTimeout(() => openModal('settingsModal'), 800);
+  } else {
+    await checkConnection();
+  }
+
+  loadDashboard();
+});
+</script>
+</body>
+</html>
